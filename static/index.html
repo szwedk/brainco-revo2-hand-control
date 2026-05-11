@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainCo Revo2 · Tactile Dashboard</title>
+<style>
+:root{
+  --bg:#08090d;--surface:#0f1117;--surface2:#161821;--border:#1e2130;
+  --accent:#6c8eff;--text:#dde0ef;--muted:#4a4f62;
+  --green:#3dffa0;--yellow:#ffd166;--red:#ff4060;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;
+     font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+header{display:flex;align-items:center;gap:12px;padding:7px 18px;
+  background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0}
+header h1{font-size:13px;font-weight:700;letter-spacing:.05em}
+.badge{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;
+  background:#1a1c28;color:var(--muted);transition:all .4s}
+.badge.ok{background:#0b2218;color:var(--green)}
+.badge.err{background:#280d14;color:var(--red)}
+.hz{margin-left:auto;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ptitle{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:7px;flex-shrink:0}
+
+/* 3-column layout: sidebar | HAND | sidebar (flex, resizable) */
+.workspace{flex:1;display:flex;overflow:hidden;min-height:0;background:var(--border)}
+.panel{background:var(--bg);padding:10px 14px;display:flex;flex-direction:column;
+  overflow:hidden;min-width:0;min-height:0}
+/* drag handles between columns */
+.col-handle{width:5px;background:var(--border);cursor:col-resize;flex-shrink:0;
+  transition:background .15s;user-select:none;-webkit-user-select:none}
+.col-handle:hover,.col-handle.dragging{background:var(--accent)}
+
+/* LEFT: sensor + finger tiles */
+.left-col{display:flex;flex-direction:column;gap:1px;background:var(--border);overflow:hidden;min-height:0;flex-shrink:0}
+.sensor-panel{background:var(--bg);flex:2;padding:10px 14px;display:flex;flex-direction:column;overflow:hidden}
+.fingers-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+  gap:7px;flex:1;min-height:0}
+.fc{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--c);
+  border-radius:10px;padding:12px 13px;display:flex;flex-direction:column;gap:5px;
+  position:relative;overflow:hidden;transition:border-color .25s,box-shadow .25s}
+.fc.contact{box-shadow:0 0 18px color-mix(in srgb,var(--c) 35%,transparent);border-color:var(--c)}
+.fc .glow{position:absolute;inset:0;border-radius:9px;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 0%,var(--c) 0%,transparent 60%);opacity:0;transition:opacity .2s}
+.fc.contact .glow{opacity:.1}
+.flabel{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--c,var(--muted));display:flex;align-items:center;justify-content:space-between}
+.sdot{width:4px;height:4px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 4px var(--green);transition:all .3s;flex-shrink:0}
+.sdot.w{background:var(--yellow);box-shadow:0 0 4px var(--yellow)}
+.sdot.e{background:var(--red);box-shadow:0 0 4px var(--red)}
+.arc-svg{width:54px;height:54px;flex-shrink:0}
+.arc-track{fill:none;stroke:var(--surface2);stroke-width:3.5}
+.arc-fill{fill:none;stroke-width:3.5;stroke-linecap:round;stroke:var(--c,var(--accent));
+  transition:stroke-dashoffset .12s,stroke .15s}
+.nfsv-text{font-weight:900;font-family:'Inter',sans-serif}
+.nfv{font-size:18px;font-weight:900;line-height:1;transition:color .15s;font-variant-numeric:tabular-nums}
+.tval{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.fc-row{display:flex;align-items:center;gap:6px}
+.prox-wrap{width:100%}
+.prox-track{width:100%;height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.prox-fill{height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--c,var(--accent)),transparent);transition:width .1s}
+.prox-lbl{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-top:2px}
+
+.finger-panel{background:var(--bg);flex:1;min-height:0;padding:10px 14px;display:flex;flex-direction:column;overflow:hidden}
+.finger-tiles{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
+  gap:7px;flex:1;min-height:0}
+.ftile{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--c);
+  border-radius:10px;padding:12px 13px;display:flex;flex-direction:column;gap:4px;
+  transition:box-shadow .2s,transform .12s;overflow:hidden;cursor:pointer}
+.ftile:hover{box-shadow:0 0 18px color-mix(in srgb,var(--c) 25%,transparent);transform:translateY(-1px)}
+.ftile:active{transform:scale(.98)}
+.ftile-top{display:flex;justify-content:space-between;align-items:center}
+.ftile-name{font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.ftile-dot{width:6px;height:6px;border-radius:50%;background:var(--surface2);
+  transition:background .25s,box-shadow .25s}
+.ftile-dot.active{background:var(--c);box-shadow:0 0 7px var(--c)}
+.ftile-val{font-size:36px;font-weight:900;line-height:1;color:var(--text);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.ftile-row{display:flex;justify-content:space-between;align-items:center}
+.ftile-pct{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ftile-max{font-size:9px;color:var(--muted)}
+.ftile-track{width:100%;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin:2px 0}
+.ftile-fill{height:100%;border-radius:2px;background:var(--c);transition:width .07s;opacity:.85}
+input.ftile-slider{width:100%;cursor:pointer;-webkit-appearance:none;appearance:none;
+  height:6px;border-radius:4px;background:var(--surface2);outline:none;border:none;margin-top:auto}
+input.ftile-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--c);cursor:pointer;
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 25%,transparent)}
+input.ftile-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
+  border:none;background:var(--c);cursor:pointer}
+
+/* CENTER: big hand */
+.center-col{position:relative;display:flex;flex-direction:column;overflow:hidden;min-height:0;background:var(--bg);flex:1;min-width:160px}
+.hand-header{padding:8px 14px 0;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.hand-hint{font-size:9px;color:var(--muted);margin-left:auto;letter-spacing:.02em}
+.hand-area{flex:1;position:relative;min-height:0;overflow:hidden}
+#hand-svg{position:absolute;inset:0;width:100%;height:100%}
+#particles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+#hand-tooltip{position:fixed;background:var(--surface);border:1px solid var(--border);
+  border-radius:7px;padding:5px 9px;font-size:11px;font-weight:700;color:var(--text);
+  pointer-events:none;display:none;z-index:100;white-space:nowrap;
+  box-shadow:0 4px 16px rgba(0,0,0,.6)}
+
+/* RIGHT: poses + chart */
+.right-col{display:flex;flex-direction:column;gap:1px;background:var(--border);overflow:hidden;min-height:0;flex-shrink:0}
+.poses-section{background:var(--bg);flex:1;min-height:120px;padding:0;display:flex;flex-direction:row;overflow:hidden;gap:1px}
+.row-handle{height:5px;background:var(--border);cursor:row-resize;flex-shrink:0;transition:background .15s;user-select:none;-webkit-user-select:none}
+.row-handle:hover,.row-handle.dragging{background:var(--accent)}
+.poses-left{padding:10px 14px;display:flex;flex-direction:column;overflow-y:auto;flex:1;min-width:0;scrollbar-width:thin}
+.poses-right{padding:10px 14px;display:flex;flex-direction:column;overflow:hidden;flex:1;min-width:0;background:var(--bg)}
+.pose-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;flex:1}
+.pbtn{padding:8px 4px;border-radius:8px;background:var(--surface);
+  border:1px solid var(--border);color:var(--text);font-size:10px;font-weight:700;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px}
+.pbtn:hover{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+.pbtn:active{transform:scale(.96)}
+.pbtn.wide{grid-column:span 2}
+.pbtn .em{font-size:14px}
+.pbtn.running{border-color:var(--green);color:var(--green);
+  background:color-mix(in srgb,var(--green) 8%,var(--surface))}
+.seq-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;flex-shrink:0}
+.seq-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s}
+.key-hints{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px;flex-shrink:0}
+.kh{background:var(--surface);border:1px solid var(--border);border-radius:4px;
+  padding:1px 5px;font-size:9px;color:var(--muted);font-family:monospace}
+/* code editor */
+.code-editor{width:100%;flex:1;min-height:0;resize:none;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;color:var(--text);
+  font-family:'Fira Code','Courier New',monospace;font-size:11px;padding:8px;
+  outline:none;line-height:1.5;scrollbar-width:thin}
+.code-editor:focus{border-color:var(--accent)}
+.run-btn{margin-top:6px;padding:6px 0;border-radius:7px;background:var(--accent);
+  border:none;color:#fff;font-size:11px;font-weight:800;cursor:pointer;
+  flex-shrink:0;transition:background .15s,transform .1s}
+.run-btn:hover{background:#5a7eff}
+.run-btn:active{transform:scale(.97)}
+.run-output{margin-top:5px;font-size:10px;color:var(--muted);font-family:monospace;
+  max-height:48px;overflow-y:auto;flex-shrink:0;line-height:1.4;word-break:break-all}
+
+.chart-section{background:var(--bg);flex:1;min-height:80px;padding:10px 14px;display:flex;flex-direction:column;overflow:hidden}
+.chart-wrap{flex:1;position:relative;min-height:0}
+canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
+  background:var(--surface);border:1px solid var(--border)}
+.cleg{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;flex-shrink:0}
+.cli{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--muted)}
+.cld{width:7px;height:7px;border-radius:50%}
+
+/* SVG hand elements */
+.palm-label{fill:var(--muted);font-size:7px;text-anchor:middle;
+  font-family:'Inter',sans-serif;pointer-events:none}
+.finger-group{cursor:ns-resize;transition:filter .15s}
+.finger-group:hover{filter:brightness(1.6) drop-shadow(0 0 6px currentColor)}
+
+@keyframes contactPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.5);opacity:0}}
+@keyframes scanRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{opacity:.7}50%{opacity:1}}
+.idle-breathe{animation:breathe 3s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<header>
+  <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+    <rect x="7" y="1" width="3" height="11" rx="1.5" fill="#6c8eff"/>
+    <rect x="11" y="0" width="3" height="12" rx="1.5" fill="#a78bfa"/>
+    <rect x="3" y="3" width="3" height="9" rx="1.5" fill="#60a5fa"/>
+    <rect x="15" y="4" width="3" height="8" rx="1.5" fill="#fbbf24"/>
+    <rect x="3" y="13" width="15" height="5" rx="2" fill="#1e2130"/>
+  </svg>
+  <h1>BrainCo Revo2Touch</h1>
+  <span class="badge" id="cbadge">Connecting&#x2026;</span>
+  <span id="devinfo" style="font-size:10px;color:var(--muted);margin-left:4px"></span>
+  <span class="hz" id="hzlbl">&#x2014; Hz</span>
+</header>
+
+<div class="workspace" id="workspace">
+
+  <!-- LEFT: sensor + finger tiles -->
+  <div class="left-col" id="lcol" style="width:255px">
+    <div class="sensor-panel">
+      <div class="ptitle">Tactile Sensors</div>
+      <div class="fingers-grid" id="fgrid"></div>
+    </div>
+    <div class="finger-panel">
+      <div class="ptitle">Finger Control</div>
+      <div class="finger-tiles" id="ftiles"></div>
+    </div>
+  </div>
+
+  <div class="col-handle" id="ch1"></div>
+
+  <!-- CENTER: hero hand -->
+  <div class="center-col" id="ccol" style="width:280px;flex:none">
+    <div class="hand-header">
+      <div class="ptitle" style="margin-bottom:0">Hand Control</div>
+      <span class="hand-hint">drag &#183; click to toggle &#183; scroll to adjust</span>
+    </div>
+    <div class="hand-area">
+      <svg id="hand-svg" viewBox="-18 0 218 320" xmlns="http://www.w3.org/2000/svg"></svg>
+      <canvas id="particles"></canvas>
+    </div>
+  </div>
+
+  <div class="col-handle" id="ch2"></div>
+
+  <!-- RIGHT: poses + chart -->
+  <div class="right-col" id="rcol" style="flex:1;min-width:200px">
+    <div class="poses-section">
+      <div class="poses-left">
+        <div class="ptitle">Poses</div>
+        <div class="pose-grid">
+          <button class="pbtn" onclick="sendPose('open')"><span class="em">&#x1f590;&#xfe0f;</span>Open</button>
+          <button class="pbtn" onclick="sendPose('fist')"><span class="em">&#x270a;</span>Fist</button>
+          <button class="pbtn" onclick="sendPose('point')"><span class="em">&#x261d;&#xfe0f;</span>Point</button>
+          <button class="pbtn" onclick="sendPose('peace')"><span class="em">&#x270c;&#xfe0f;</span>Peace</button>
+          <button class="pbtn" onclick="sendPose('pinch')"><span class="em">&#x1f90f;</span>Pinch</button>
+          <button class="pbtn" onclick="sendPose('ok')"><span class="em">&#x1f44c;</span>OK</button>
+          <button class="pbtn" onclick="sendPose('gun')"><span class="em">&#x1f52b;</span>Gun</button>
+          <button class="pbtn" onclick="sendPose('claw')"><span class="em">&#x1f9be;</span>Claw</button>
+          <button class="pbtn" onclick="sendPose('relax')"><span class="em">&#x1f4a4;</span>Relax</button>
+          <button class="pbtn" onclick="sendPose('rock')"><span class="em">&#x1f918;</span>Rock</button>
+          <button class="pbtn" onclick="sendPose('three')"><span class="em">3&#xfe0f;&#x20e3;</span>Three</button>
+          <button class="pbtn wide" id="demobtn" onclick="runDemo()"><span class="em">&#x25b6;</span>Run Demo</button>
+        </div>
+        <div class="seq-bar"><div class="seq-fill" id="seqfill" style="width:0%"></div></div>
+        <div class="key-hints">
+          <span class="kh">O</span><span style="font-size:9px;color:var(--muted)">Open</span>
+          <span class="kh">F</span><span style="font-size:9px;color:var(--muted)">Fist</span>
+          <span class="kh">P</span><span style="font-size:9px;color:var(--muted)">Point</span>
+          <span class="kh">V</span><span style="font-size:9px;color:var(--muted)">Peace</span>
+          <span class="kh">N</span><span style="font-size:9px;color:var(--muted)">Pinch</span>
+          <span class="kh">K</span><span style="font-size:9px;color:var(--muted)">OK</span>
+        </div>
+      </div>
+      <div class="poses-right" style="border-left:1px solid var(--border)">
+        <div class="ptitle">Custom Code</div>
+        <textarea class="code-editor" id="codeEditor" spellcheck="false">// positions: [thumb,thaux,index,middle,ring,pinky] 0-1000
+// send(positions) — send to hand
+// pose(name) — run a named pose
+// sleep(ms) — async wait
+// log(msg) — print below
+
+async function run() {
+  // wave fingers
+  for (let i = 2; i <= 5; i++) {
+    let p = [800,800,0,0,0,0];
+    p[i] = 1000;
+    send(p);
+    await sleep(300);
+  }
+  await sleep(200);
+  send([0,0,0,0,0,0]);
+  log('done!');
+}
+
+run();</textarea>
+        <button class="run-btn" onclick="runCustomCode()">&#x25b6; Run</button>
+        <div class="run-output" id="runOutput"></div>
+      </div>
+    </div>
+    <div class="row-handle" id="rh1"></div>
+    <div class="chart-section">
+      <div class="ptitle">Force History (2500 N scale)</div>
+      <div class="chart-wrap">
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="cleg" id="cleg"></div>
+    </div>
+  </div>
+
+</div>
+<div id="hand-tooltip"></div>
+
+<script>
+const FN   = ["Thumb","Index","Middle","Ring","Pinky"];
+const FC   = ["#a78bfa","#60a5fa","#34d399","#fbbf24","#f87171"];
+const FC_B = ["#ede9fe","#dbeafe","#d1fae5","#fef3c7","#fee2e2"]; // bright versions
+const SN   = ["Thumb","ThAux","Index","Middle","Ring","Pinky"];
+const SC   = ["#a78bfa","#c4b5fd","#60a5fa","#34d399","#fbbf24","#f87171"];
+const HLEN = 200, FSCALE = 2500;
+const POSES = {
+  open:   [0,   0,   0,    0,    0,    0],
+  fist:   [800, 800, 1000, 1000, 1000, 1000],
+  point:  [800, 800, 0,    1000, 1000, 1000],
+  peace:  [800, 800, 0,    0,    1000, 1000],
+  pinch:  [500, 0,   500,  0,    0,    0],
+  ok:     [700, 600, 700,  0,    0,    0],
+  gun:    [0,   0,   0,    1000, 1000, 1000],
+  claw:   [0,   0,   500,  500,  500,  500],
+  spread: [0,   0,   0,    0,    0,    0],
+  relax:  [300, 200, 300,  300,  300,  300],
+  three:  [800, 800, 0,    0,    0,    1000],
+  rock:   [0,   0,   1000, 1000, 0,    0],
+};
+const DEMO_SEQ = [
+  {pose:"open",dur:1200},{pose:"fist",dur:1200},{pose:"point",dur:900},
+  {pose:"peace",dur:900},{pose:"gun",dur:900},{pose:"ok",dur:900},
+  {pose:"claw",dur:900},{pose:"rock",dur:900},{pose:"three",dur:900},{pose:"open",dur:800}
+];
+
+let ws, hzF=0, hzT=performance.now();
+const sliderVals = [0,0,0,0,0,0];
+const history    = Array.from({length:5},()=>Array(HLEN).fill(0));
+const forceLevel = [0,0,0,0,0];
+const prevForce  = [0,0,0,0,0];
+const tipPos     = Array.from({length:5},()=>({x:100,y:60}));
+let demoRunning  = false, dragState = null, dragMoved = false;
+
+// ── tactile cards ────────────────────────────────────
+const fgrid = document.getElementById("fgrid");
+FN.forEach((name,i)=>{
+  const c=FC[i],R=16,circ=(2*Math.PI*R).toFixed(1);
+  const d=document.createElement("div");
+  d.className="fc";d.id="fc"+i;d.style.setProperty("--c",c);
+  d.innerHTML='<div class="glow"></div>'+
+    '<div class="flabel">'+name+'<span class="sdot" id="sd'+i+'"></span></div>'+
+    '<div class="fc-row">'+
+      '<svg class="arc-svg" viewBox="0 0 42 42">'+
+        '<circle cx="21" cy="21" r="'+R+'" class="arc-track"/>'+
+        '<circle cx="21" cy="21" r="'+R+'" class="arc-fill" id="arc'+i+'"'+
+          ' stroke-dasharray="'+circ+'" stroke-dashoffset="'+circ+'" transform="rotate(-90 21 21)"/>'+
+        '<text x="21" y="25" text-anchor="middle" font-size="9" class="nfsv-text"'+
+          ' fill="'+c+'" font-family="Inter,sans-serif" id="nfsv'+i+'">0</text></svg>'+
+      '<div style="display:flex;flex-direction:column;gap:3px;min-width:0">'+
+        '<div class="nfv" id="nfv'+i+'" style="color:'+c+'">0.00</div>'+
+        '<div style="font-size:9px;color:var(--muted);font-weight:600">Newtons</div>'+
+        '<div style="display:flex;align-items:center;gap:4px;margin-top:2px">'+
+          '<svg width="20" height="20" viewBox="-14 -14 28 28" style="overflow:visible;flex-shrink:0">'+
+            '<circle r="11" fill="none" stroke="#1e2130" stroke-width="1"/>'+
+            '<g id="tarr'+i+'"><line x1="0" y1="0" x2="0" y2="-8" stroke="'+c+'" stroke-width="2" stroke-linecap="round"/>'+
+            '<polygon points="0,-11 1.8,-7 -1.8,-7" fill="'+c+'"/></g>'+
+            '<circle r="1.8" fill="'+c+'" opacity=".4"/></svg>'+
+          '<div class="tval" id="tv'+i+'">0.0 N</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="prox-wrap"><div class="prox-lbl"><span>Proximity</span><span id="pv'+i+'">0</span></div>'+
+      '<div class="prox-track"><div class="prox-fill" id="pf'+i+'" style="width:0%"></div></div></div>';
+  fgrid.appendChild(d);
+});
+
+// ── finger tiles ─────────────────────────────────────
+const ftiles = document.getElementById("ftiles");
+SN.forEach((n,i)=>{
+  const c=SC[i],tile=document.createElement("div");
+  tile.className="ftile";tile.style.setProperty("--c",c);
+  tile.innerHTML='<div class="ftile-top"><div class="ftile-name">'+n+'</div>'+
+    '<div class="ftile-dot" id="ftd'+i+'"></div></div>'+
+    '<div class="ftile-val" id="sv'+i+'">0</div>'+
+    '<div class="ftile-row"><div class="ftile-pct" id="svp'+i+'">0%</div>'+
+      '<div class="ftile-max">/ 1000</div></div>'+
+    '<div class="ftile-track"><div class="ftile-fill" id="stfill'+i+'" style="width:0%"></div></div>'+
+    '<input type="range" class="ftile-slider" min="0" max="1000" value="0" id="sl'+i+'"'+
+      ' oninput="onSlider('+i+',+this.value)">';
+  ftiles.appendChild(tile);
+});
+function setTileVal(i,v){
+  document.getElementById("sv"+i).textContent=Math.round(v);
+  document.getElementById("svp"+i).textContent=Math.round(v/10)+"%";
+  document.getElementById("stfill"+i).style.width=(v/10)+"%";
+  const dot=document.getElementById("ftd"+i);
+  if(dot)dot.classList.toggle("active",v>0);
+}
+function onSlider(i,v){
+  sliderVals[i]=v;setTileVal(i,v);sendPositions();updateHandViz(sliderVals);
+}
+
+// chart legend
+const cleg=document.getElementById("cleg");
+FN.forEach((n,i)=>{
+  const li=document.createElement("div");li.className="cli";
+  li.innerHTML='<div class="cld" style="background:'+FC[i]+'"></div>'+n;
+  cleg.appendChild(li);
+});
+
+// ── SVG HAND ─────────────────────────────────────────
+const SVG_NS="http://www.w3.org/2000/svg";
+const handSvg=document.getElementById("hand-svg");
+function mkEl(tag,attrs={}){
+  const e=document.createElementNS(SVG_NS,tag);
+  Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));
+  return e;
+}
+function mkLine(x1,y1,x2,y2,extra={}){
+  return mkEl("line",{x1,y1,x2,y2,...extra});
+}
+
+// SVG defs: gradients + filters
+const defs=mkEl("defs");
+handSvg.appendChild(defs);
+
+// Blur filters
+const sfilt=mkEl("filter",{id:"sf","x":"-50%","y":"-50%",width:"200%",height:"200%"});
+sfilt.appendChild(mkEl("feGaussianBlur",{stdDeviation:"2",result:"blur"}));
+defs.appendChild(sfilt);
+
+const gfilt=mkEl("filter",{id:"gf","x":"-100%","y":"-100%",width:"300%",height:"300%"});
+gfilt.appendChild(mkEl("feGaussianBlur",{stdDeviation:"5",result:"blur"}));
+defs.appendChild(gfilt);
+
+const gfilt2=mkEl("filter",{id:"gf2","x":"-200%","y":"-200%",width:"500%",height:"500%"});
+gfilt2.appendChild(mkEl("feGaussianBlur",{stdDeviation:"10",result:"blur"}));
+defs.appendChild(gfilt2);
+
+// Per-finger gradients
+const FDEFS=[
+  {bx:52,by:168,segs:[28,22,18],angle:-120,color:"#a78bfa",si:0,name:"Thumb"},
+  {bx:72,by:108,segs:[36,28,20],angle:-88,color:"#60a5fa",si:2,name:"Index"},
+  {bx:96,by:100,segs:[42,30,22],angle:-90,color:"#34d399",si:3,name:"Middle"},
+  {bx:120,by:106,segs:[38,28,20],angle:-90,color:"#fbbf24",si:4,name:"Ring"},
+  {bx:142,by:118,segs:[28,22,16],angle:-88,color:"#f87171",si:5,name:"Pinky"},
+];
+const THUMB_BX_OPEN=52,THUMB_BX_CLOSED=62;
+
+FDEFS.forEach((fd,fi)=>{
+  const totalLen=fd.segs.reduce((s,l)=>s+l,0);
+  const rad=fd.angle*Math.PI/180;
+  const tx=fd.bx+Math.cos(rad)*totalLen,ty=fd.by+Math.sin(rad)*totalLen;
+
+  // Main gradient: dark root → color → bright tip
+  const g1=mkEl("linearGradient",{id:"fg"+fi,gradientUnits:"userSpaceOnUse",
+    x1:fd.bx,y1:fd.by,x2:tx,y2:ty});
+  const s0=mkEl("stop",{offset:"0%","stop-color":fd.color,"stop-opacity":"0.15"});
+  const s1=mkEl("stop",{offset:"35%","stop-color":fd.color,"stop-opacity":"0.75"});
+  const s2=mkEl("stop",{offset:"100%","stop-color":FC_B[fi],"stop-opacity":"1"});
+  g1.appendChild(s0);g1.appendChild(s1);g1.appendChild(s2);
+  defs.appendChild(g1);
+
+  // Glow gradient: transparent → color (for force glow effect)
+  const g2=mkEl("linearGradient",{id:"fgg"+fi,gradientUnits:"userSpaceOnUse",
+    x1:fd.bx,y1:fd.by,x2:tx,y2:ty});
+  const gs0=mkEl("stop",{offset:"0%","stop-color":fd.color,"stop-opacity":"0"});
+  const gs1=mkEl("stop",{offset:"50%","stop-color":fd.color,"stop-opacity":"0.5"});
+  const gs2=mkEl("stop",{offset:"100%","stop-color":"#ffffff","stop-opacity":"0.8"});
+  g2.appendChild(gs0);g2.appendChild(gs1);g2.appendChild(gs2);
+  defs.appendChild(g2);
+});
+
+// BG group: scan grid
+const bgGrp=mkEl("g",{"pointer-events":"none",opacity:"0.12"});
+handSvg.appendChild(bgGrp);
+for(let r=30;r<=140;r+=28){
+  bgGrp.appendChild(mkEl("circle",{cx:"100",cy:"210",r,fill:"none",stroke:"#4a5068","stroke-width":"0.6"}));
+}
+for(let a=0;a<360;a+=22.5){
+  const rad=a*Math.PI/180;
+  bgGrp.appendChild(mkLine(100,210,
+    (100+Math.cos(rad)*140).toFixed(1),(210+Math.sin(rad)*140).toFixed(1),
+    {stroke:"#4a5068","stroke-width":"0.4"}));
+}
+
+// Rotating scan arc group
+const scanGrp=mkEl("g",{"pointer-events":"none"});
+handSvg.appendChild(scanGrp);
+const scanLine=mkEl("line",{x1:"100",y1:"210",x2:"100",y2:"70",stroke:"#6c8eff",
+  "stroke-width":"1",opacity:"0.25","pointer-events":"none"});
+const scanSweep=mkEl("path",{fill:"#6c8eff","fill-opacity":"0.04",d:"M100,210 L100,70 A140,140 0 0,1 140,210 Z",
+  "pointer-events":"none"});
+scanGrp.appendChild(scanSweep);
+scanGrp.appendChild(scanLine);
+
+// Palm
+const palmEl=mkEl("path",{
+  d:"M50,170 Q38,202 43,244 Q58,274 100,278 Q142,274 157,244 Q162,202 150,170 Q138,153 118,147 Q100,143 82,147 Z",
+  fill:"#101218",stroke:"#1e2130","stroke-width":"1.5"});
+handSvg.appendChild(palmEl);
+// Palm glow (behind everything, force-reactive)
+const palmGlow=mkEl("ellipse",{cx:"100",cy:"220",rx:"60",ry:"50",
+  fill:"#6c8eff",opacity:"0",filter:"url(#gf2)","pointer-events":"none"});
+handSvg.appendChild(palmGlow);
+const palmLbl=mkEl("text",{x:"100",y:"230","class":"palm-label"});
+palmLbl.textContent="Revo2Touch";
+handSvg.appendChild(palmLbl);
+
+// Effects group (ripples go here, always on top)
+const fxGrp=mkEl("g",{id:"fxgrp","pointer-events":"none"});
+
+// Build fingers
+const fingerData=[];
+FDEFS.forEach((fd,fi)=>{
+  const rad=fd.angle*Math.PI/180;
+  const dx0=Math.cos(rad),dy0=Math.sin(rad);
+  const g=mkEl("g",{id:"fg"+fi,"class":"finger-group"});
+  handSvg.appendChild(g);
+
+  const shadows=[],glowBones=[],bones=[],knuckles=[];
+  let cx=fd.bx,cy=fd.by;
+
+  fd.segs.forEach((len,si)=>{
+    const ex=cx+dx0*len,ey=cy+dy0*len;
+    // Shadow
+    const sh=mkLine(cx,cy,ex,ey,{stroke:"#000","stroke-width":"16",
+      "stroke-linecap":"round",opacity:"0.55",filter:"url(#sf)"});
+    g.appendChild(sh);shadows.push(sh);
+    // Glow (force-driven)
+    const gl=mkLine(cx,cy,ex,ey,{stroke:"url(#fgg"+fi+")","stroke-width":"24",
+      "stroke-linecap":"round",opacity:"0",filter:"url(#gf)"});
+    g.appendChild(gl);glowBones.push(gl);
+    // Main bone (gradient)
+    const b=mkLine(cx,cy,ex,ey,{stroke:"url(#fg"+fi+")","stroke-width":"11",
+      "stroke-linecap":"round",opacity:"0.45"});
+    g.appendChild(b);bones.push(b);
+    // Knuckle
+    const k=mkEl("circle",{cx,cy,r:"5.5",fill:fd.color,opacity:"0.55",
+      stroke:"#fff","stroke-width":"0.8","stroke-opacity":"0.25"});
+    g.appendChild(k);knuckles.push(k);
+    cx=ex;cy=ey;
+  });
+
+  // Tip elements (cx,cy = tip now)
+  const tipGlow=mkEl("ellipse",{cx,cy,rx:"22",ry:"22",
+    fill:fd.color,opacity:"0",filter:"url(#gf)",id:"tglow"+fi,"pointer-events":"none"});
+  g.insertBefore(tipGlow,g.firstChild); // behind bones
+
+  const tipRing=mkEl("circle",{cx,cy,r:"12",fill:"none",
+    stroke:fd.color,"stroke-width":"1.5",opacity:"0.25"});
+  g.appendChild(tipRing);
+
+  const tipCirc=mkEl("circle",{cx,cy,r:"8",fill:fd.color,opacity:"0.25",id:"tip"+fi});
+  g.appendChild(tipCirc);
+
+  // Energy dot
+  const edot=mkEl("circle",{cx,cy,r:"3",fill:"#fff",opacity:"0"});
+  g.appendChild(edot);
+
+  // Finger label (outside group)
+  const lbl=mkEl("text",{
+    x:fd.bx+(fd.name==="Thumb"?-18:0),y:fd.by+(fd.name==="Thumb"?14:18),
+    fill:fd.color,"font-size":"8","text-anchor":"middle",
+    "font-family":"Inter,sans-serif","font-weight":"800",opacity:"0.65",
+    "pointer-events":"none"});
+  lbl.textContent=fd.name;
+  handSvg.appendChild(lbl);
+
+  tipPos[fi]={x:cx,y:cy};
+  fingerData.push({shadows,glowBones,bones,knuckles,tipGlow,tipRing,tipCirc,edot,fdef:fd});
+});
+
+handSvg.appendChild(fxGrp);
+
+// ── updateHandViz ─────────────────────────────────────
+function updateHandViz(vals){
+  const thAux=(vals[1]||0)/1000;
+  FDEFS[0].bx=THUMB_BX_OPEN+(THUMB_BX_CLOSED-THUMB_BX_OPEN)*thAux;
+
+  FDEFS.forEach((fd,fi)=>{
+    const frac=(vals[fd.si]||0)/1000;
+    const f=forceLevel[fi];
+    const rad=fd.angle*Math.PI/180,maxCurl=1.4;
+    let cx=fd.bx,cy=fd.by,angle=rad;
+    const fd_i=fingerData[fi];
+
+    fd.segs.forEach((len,si)=>{
+      const segCurl=(si===0?.4:si===1?.55:.45)*maxCurl*frac;
+      angle+=(si===0?0:segCurl);
+      const ex=cx+Math.cos(angle)*len,ey=cy+Math.sin(angle)*len;
+      const setLn=(el)=>{
+        el.setAttribute("x1",cx.toFixed(1));el.setAttribute("y1",cy.toFixed(1));
+        el.setAttribute("x2",ex.toFixed(1));el.setAttribute("y2",ey.toFixed(1));
+      };
+      setLn(fd_i.shadows[si]);setLn(fd_i.glowBones[si]);setLn(fd_i.bones[si]);
+      fd_i.bones[si].setAttribute("opacity",(0.3+frac*.55).toFixed(2));
+      fd_i.glowBones[si].setAttribute("opacity",(f*.7).toFixed(2));
+      fd_i.knuckles[si].setAttribute("cx",cx.toFixed(1));
+      fd_i.knuckles[si].setAttribute("cy",cy.toFixed(1));
+      fd_i.knuckles[si].setAttribute("opacity",(0.45+frac*.45).toFixed(2));
+      if(si===0)angle+=segCurl;
+      cx=ex;cy=ey;
+    });
+
+    tipPos[fi]={x:cx,y:cy};
+    const setPos=(el)=>{el.setAttribute("cx",cx.toFixed(1));el.setAttribute("cy",cy.toFixed(1));};
+    setPos(fd_i.tipGlow);setPos(fd_i.tipCirc);setPos(fd_i.tipRing);
+
+    // Force-reactive tip
+    const tipR=7+f*8;
+    const tipCol=f>0.6?"#ff4060":f>0.3?"#ffd166":fd.color;
+    fd_i.tipCirc.setAttribute("r",tipR.toFixed(1));
+    fd_i.tipCirc.setAttribute("fill",tipCol);
+    fd_i.tipCirc.setAttribute("opacity",(0.2+frac*.5+f*.3).toFixed(2));
+    fd_i.tipRing.setAttribute("cx",cx.toFixed(1));fd_i.tipRing.setAttribute("cy",cy.toFixed(1));
+    fd_i.tipRing.setAttribute("r",(tipR+5).toFixed(1));
+    fd_i.tipRing.setAttribute("stroke",tipCol);
+    fd_i.tipRing.setAttribute("opacity",(0.15+f*.5).toFixed(2));
+    fd_i.tipGlow.setAttribute("opacity",(f*.65).toFixed(2));
+
+    // Update gradient endpoints to match current tip
+    const setGrad=(id)=>{
+      const gr=document.getElementById(id);
+      if(!gr)return;
+      gr.setAttribute("x1",fd.bx.toFixed(1));gr.setAttribute("y1",fd.by.toFixed(1));
+      gr.setAttribute("x2",cx.toFixed(1));gr.setAttribute("y2",cy.toFixed(1));
+    };
+    setGrad("fg"+fi);setGrad("fgg"+fi);
+  });
+
+  // Palm glow = average force
+  const avgF=forceLevel.reduce((s,v)=>s+v,0)/5;
+  palmGlow.setAttribute("opacity",(avgF*.4).toFixed(2));
+}
+
+// ── interactions ──────────────────────────────────────
+const tooltip=document.getElementById("hand-tooltip");
+
+FDEFS.forEach((fd,fi)=>{
+  const g=document.getElementById("fg"+fi);
+
+  g.addEventListener("mouseenter",e=>{
+    tooltip.style.display="block";
+  });
+  g.addEventListener("mousemove",e=>{
+    tooltip.textContent=fd.name+" · "+sliderVals[fd.si];
+    tooltip.style.left=(e.clientX+14)+"px";
+    tooltip.style.top=(e.clientY-8)+"px";
+  });
+  g.addEventListener("mouseleave",()=>{
+    tooltip.style.display="none";
+  });
+
+  // Click to toggle
+  g.addEventListener("click",e=>{
+    if(dragMoved){dragMoved=false;return;}
+    const v=sliderVals[fd.si]>500?0:1000;
+    sliderVals[fd.si]=v;
+    document.getElementById("sl"+fd.si).value=v;
+    setTileVal(fd.si,v);
+    sendPositions();updateHandViz(sliderVals);
+    emitParticles(fi,10);
+  });
+
+  // Scroll to adjust
+  g.addEventListener("wheel",e=>{
+    e.preventDefault();
+    const delta=e.deltaY>0?-50:50;
+    const v=Math.max(0,Math.min(1000,sliderVals[fd.si]+delta));
+    sliderVals[fd.si]=Math.round(v);
+    document.getElementById("sl"+fd.si).value=v;
+    setTileVal(fd.si,v);
+    sendPositions();updateHandViz(sliderVals);
+  },{passive:false});
+
+  // Drag start
+  g.addEventListener("mousedown",e=>{
+    e.preventDefault();e.stopPropagation();
+    dragState={si:fd.si,fi,startY:e.clientY,startVal:sliderVals[fd.si]};
+    dragMoved=false;
+  });
+  g.addEventListener("touchstart",e=>{
+    e.preventDefault();
+    dragState={si:fd.si,fi,startY:e.touches[0].clientY,startVal:sliderVals[fd.si]};
+    dragMoved=false;
+  },{passive:false});
+});
+
+window.addEventListener("mousemove",e=>{
+  if(!dragState)return;
+  const delta=e.clientY-dragState.startY;
+  if(Math.abs(delta)>3)dragMoved=true;
+  const v=Math.max(0,Math.min(1000,dragState.startVal+delta*4));
+  sliderVals[dragState.si]=Math.round(v);
+  document.getElementById("sl"+dragState.si).value=v;
+  setTileVal(dragState.si,v);
+  updateHandViz(sliderVals);sendPositions();
+  tooltip.textContent=FDEFS[dragState.fi].name+" · "+Math.round(v);
+});
+window.addEventListener("mouseup",()=>{dragState=null;});
+window.addEventListener("touchmove",e=>{
+  if(!dragState)return;e.preventDefault();
+  const v=Math.max(0,Math.min(1000,dragState.startVal+(e.touches[0].clientY-dragState.startY)*4));
+  sliderVals[dragState.si]=Math.round(v);
+  document.getElementById("sl"+dragState.si).value=v;
+  setTileVal(dragState.si,v);
+  updateHandViz(sliderVals);sendPositions();
+},{passive:false});
+window.addEventListener("touchend",()=>{dragState=null;});
+
+// Keyboard shortcuts
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT")return;
+  const map={o:"open",f:"fist",p:"point",v:"peace",n:"pinch",k:"ok"," ":"open"};
+  const pose=map[e.key.toLowerCase()];
+  if(pose){e.preventDefault();sendPose(pose);}
+});
+
+// ── Particle + Ripple + Energy system ─────────────────
+const pCanvas=document.getElementById("particles");
+const pCtx=pCanvas.getContext("2d");
+const particles=[];
+const ripples=[];
+const DPR=window.devicePixelRatio||1;
+
+// Energy dot phases
+const energyPhase=FDEFS.map((_,i)=>i*0.22);
+const energySpeed=0.015;
+
+function svgToCanvas(sx,sy){
+  const sr=handSvg.getBoundingClientRect();
+  const pr=pCanvas.getBoundingClientRect();
+  const scX=sr.width/200,scY=sr.height/320;
+  return{x:(sr.left-pr.left)+sx*scX,y:(sr.top-pr.top)+sy*scY};
+}
+
+function emitParticles(fi,count){
+  const tp=tipPos[fi];
+  const {x,y}=svgToCanvas(tp.x,tp.y);
+  const col=FC[fi];
+  for(let i=0;i<count;i++){
+    const a=Math.random()*Math.PI*2,s=0.4+Math.random()*3;
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-0.8,col,
+      alpha:1,size:1+Math.random()*2.5,life:1,decay:0.022+Math.random()*0.02});
+  }
+}
+
+function emitRipple(fi){
+  const tp=tipPos[fi];
+  const el=mkEl("circle",{cx:tp.x.toFixed(1),cy:tp.y.toFixed(1),
+    r:"9",fill:"none",stroke:FC[fi],"stroke-width":"2",opacity:"0.9"});
+  fxGrp.appendChild(el);
+  ripples.push({el,r:9,alpha:0.9,fi});
+}
+
+function flashFinger(fi){
+  const g=document.getElementById("fg"+fi);
+  if(!g)return;
+  g.style.filter="brightness(3.5)";
+  setTimeout(()=>g.style.filter="brightness(1.5)",120);
+  setTimeout(()=>g.style.filter="brightness(2.5)",200);
+  setTimeout(()=>g.style.filter="",380);
+}
+
+function getFingerPosAt(fi,phase){
+  const fd=FDEFS[fi];
+  const frac=(sliderVals[fd.si]||0)/1000;
+  const rad=fd.angle*Math.PI/180,maxCurl=1.4;
+  const total=fd.segs.reduce((s,l)=>s+l,0);
+  let dist=phase*total,cx=fd.bx,cy=fd.by,angle=rad;
+  for(let si=0;si<fd.segs.length;si++){
+    const len=fd.segs[si];
+    const sc=(si===0?.4:si===1?.55:.45)*maxCurl*frac;
+    if(si>0)angle+=sc;
+    const step=Math.min(dist,len);
+    cx+=Math.cos(angle)*step;cy+=Math.sin(angle)*step;
+    if(si===0)angle+=sc;
+    dist-=step;
+    if(dist<=0)break;
+  }
+  return{x:cx,y:cy};
+}
+
+let scanAngle=0;
+function animLoop(){
+  // Resize canvas
+  const pr=pCanvas.parentElement.getBoundingClientRect();
+  const w=pr.width,h=pr.height;
+  if(Math.round(pCanvas.width)!==Math.round(w*DPR)){
+    pCanvas.width=Math.round(w*DPR);pCanvas.height=Math.round(h*DPR);
+  }
+  pCtx.setTransform(DPR,0,0,DPR,0,0);
+  pCtx.clearRect(0,0,w,h);
+
+  // Particles
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.vy+=0.06;p.life-=p.decay;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    pCtx.globalAlpha=p.life*.85;
+    pCtx.fillStyle=p.col;
+    pCtx.beginPath();pCtx.arc(p.x,p.y,p.size*Math.max(p.life,.1),0,Math.PI*2);
+    pCtx.fill();
+  }
+  pCtx.globalAlpha=1;
+
+  // Ripples (SVG)
+  for(let i=ripples.length-1;i>=0;i--){
+    const r=ripples[i];
+    r.r+=2.2;r.alpha-=0.028;
+    if(r.alpha<=0){r.el.remove();ripples.splice(i,1);continue;}
+    const tp=tipPos[r.fi];
+    r.el.setAttribute("cx",tp.x.toFixed(1));
+    r.el.setAttribute("cy",tp.y.toFixed(1));
+    r.el.setAttribute("r",r.r.toFixed(1));
+    r.el.setAttribute("opacity",r.alpha.toFixed(2));
+  }
+
+  // Energy dots
+  FDEFS.forEach((fd,fi)=>{
+    const frac=(sliderVals[fd.si]||0)/1000;
+    const f=forceLevel[fi];
+    const active=frac>0.05||f>0.05;
+    const edot=fingerData[fi].edot;
+    if(active){
+      energyPhase[fi]=(energyPhase[fi]+energySpeed*(0.5+frac*2.5))%1;
+      const pos=getFingerPosAt(fi,energyPhase[fi]);
+      edot.setAttribute("cx",pos.x.toFixed(1));
+      edot.setAttribute("cy",pos.y.toFixed(1));
+      edot.setAttribute("r",(2+frac*1.5).toFixed(1));
+      const ec=f>0.6?"#ff4060":f>0.25?"#ffd166":"#ffffff";
+      edot.setAttribute("fill",ec);
+      edot.setAttribute("opacity",(0.4+frac*.5+f*.3).toFixed(2));
+    } else {
+      edot.setAttribute("opacity","0");
+    }
+  });
+
+  // Scan line rotate
+  scanAngle=(scanAngle+0.4)%360;
+  const sr=scanAngle*Math.PI/180;
+  const sx=(100+Math.cos(sr)*140).toFixed(1),sy=(210+Math.sin(sr)*140).toFixed(1);
+  scanLine.setAttribute("x2",sx);scanLine.setAttribute("y2",sy);
+  // Update sweep arc
+  const sr2=((scanAngle+20)%360)*Math.PI/180;
+  const ex=(100+Math.cos(sr2)*140).toFixed(1),ey=(210+Math.sin(sr2)*140).toFixed(1);
+  scanSweep.setAttribute("d","M100,210 L"+sx+","+sy+" A140,140 0 0,1 "+ex+","+ey+" Z");
+
+  requestAnimationFrame(animLoop);
+}
+animLoop();
+
+// ── Tactile update ─────────────────────────────────────
+function updateTactile(touch){
+  FN.forEach((_,i)=>{
+    const t=touch[i],nf=t.normal,tf=t.tangential,dir=t.direction,prox=t.proximity;
+    history[i].push(nf);if(history[i].length>HLEN)history[i].shift();
+    prevForce[i]=forceLevel[i];
+    forceLevel[i]=Math.min(nf/FSCALE,1);
+
+    const R=16,circ=2*Math.PI*R,frac=forceLevel[i];
+    const arcEl=document.getElementById("arc"+i);
+    arcEl.style.strokeDashoffset=circ*(1-frac);
+    const ac=nf<500?FC[i]:nf<1500?"#ffd166":"#ff4060";
+    arcEl.style.stroke=ac;
+    document.getElementById("nfsv"+i).textContent=nf.toFixed(1);
+    const nfv=document.getElementById("nfv"+i);
+    nfv.textContent=nf.toFixed(1);nfv.style.color=ac;
+    document.getElementById("tv"+i).textContent=tf.toFixed(1)+" N";
+    document.getElementById("tarr"+i).setAttribute("transform","rotate("+dir+")");
+    document.getElementById("pf"+i).style.width=Math.min(prox/200*100,100)+"%";
+    document.getElementById("pv"+i).textContent=prox.toFixed(0);
+    const dot=document.getElementById("sd"+i);
+    dot.className="sdot"+(t.status===1?" w":t.status===2?" e":"");
+    document.getElementById("fc"+i).classList.toggle("contact",nf>50);
+
+    // Contact events
+    if(forceLevel[i]>0.02&&prevForce[i]<=0.02){
+      emitRipple(i);emitParticles(i,6);
+    }
+    if(forceLevel[i]>0.4&&prevForce[i]<=0.4){
+      emitRipple(i);emitParticles(i,16);flashFinger(i);
+    }
+  });
+}
+
+// ── Chart ──────────────────────────────────────────────
+const cv=document.getElementById("chart"),ctx=cv.getContext("2d");
+function drawChart(){
+  const W=cv.offsetWidth,H=cv.offsetHeight;
+  if(!W||!H)return;
+  cv.width=W*DPR;cv.height=H*DPR;
+  ctx.scale(DPR,DPR);
+  ctx.clearRect(0,0,W,H);
+  ctx.strokeStyle="#1e2130";ctx.lineWidth=1;
+  ctx.fillStyle="#3a3f55";ctx.font="9px Inter,sans-serif";ctx.textAlign="right";
+  [.25,.5,.75,1].forEach(f=>{
+    const y=H-f*(H-8)-4;
+    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+    ctx.fillText(Math.round(f*FSCALE)+" N",W-3,y-2);
+  });
+  FN.forEach((_,i)=>{
+    const d=history[i];
+    ctx.beginPath();ctx.strokeStyle=FC[i];ctx.lineWidth=1.8;
+    d.forEach((v,j)=>{
+      const x=j/(HLEN-1)*W,y=H-Math.min(v/FSCALE,1)*(H-8)-4;
+      j===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+    });
+    ctx.stroke();
+  });
+}
+
+// ── WebSocket ──────────────────────────────────────────
+const cbadge=document.getElementById("cbadge"),hzlbl=document.getElementById("hzlbl");
+const devinfo=document.getElementById("devinfo");
+function connect(){
+  const proto=location.protocol==="https:"?"wss":"ws";
+  ws=new WebSocket(proto+"://"+location.host+"/ws");
+  ws.onopen=()=>{cbadge.textContent="Connected";cbadge.className="badge ok";};
+  ws.onclose=()=>{cbadge.textContent="Disconnected";cbadge.className="badge err";setTimeout(connect,2000);};
+  ws.onerror=()=>ws.close();
+  ws.onmessage=e=>{
+    const d=JSON.parse(e.data);
+    if(d.device_info&&!devinfo.textContent)devinfo.textContent=d.device_info;
+    if(!d.connected)return;
+    if(d.positions&&!dragState){
+      d.positions.forEach((p,i)=>{
+        const sl=document.getElementById("sl"+i);
+        if(sl&&document.activeElement!==sl){sl.value=p;sliderVals[i]=p;setTileVal(i,p);}
+      });
+    }
+    if(d.touch)updateTactile(d.touch);
+    updateHandViz(sliderVals);
+    drawChart();
+    hzF++;
+    const now=performance.now();
+    if(now-hzT>1000){hzlbl.textContent=hzF+" Hz";hzF=0;hzT=now;}
+  };
+}
+function sendPositions(){
+  if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"set_positions",positions:[...sliderVals]}));
+}
+function sendPose(name){
+  if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"pose",name}));
+  const p=POSES[name];if(!p)return;
+  p.forEach((v,i)=>{
+    sliderVals[i]=v;
+    const sl=document.getElementById("sl"+i);
+    if(sl)sl.value=v;
+    setTileVal(i,v);
+  });
+  updateHandViz(sliderVals);
+  // Particles burst on pose change
+  FDEFS.forEach((_,fi)=>{ if(p[FDEFS[fi].si]>500)setTimeout(()=>emitParticles(fi,8),fi*80); });
+}
+async function runDemo(){
+  if(demoRunning)return;
+  demoRunning=true;
+  const btn=document.getElementById("demobtn");
+  btn.classList.add("running");
+  const fill=document.getElementById("seqfill");
+  const total=DEMO_SEQ.reduce((s,x)=>s+x.dur,0);
+  let elapsed=0;
+  for(const step of DEMO_SEQ){
+    if(!demoRunning)break;
+    sendPose(step.pose);
+    btn.innerHTML='<span class="em">&#x25b6;</span>'+step.pose;
+    const t0=performance.now();
+    while(performance.now()-t0<step.dur){
+      if(!demoRunning)break;
+      elapsed+=16;fill.style.width=Math.min(elapsed/total*100,100)+"%";
+      await new Promise(r=>setTimeout(r,16));
+    }
+  }
+  demoRunning=false;btn.classList.remove("running");
+  btn.innerHTML='<span class="em">&#x25b6;</span>Run Demo';fill.style.width="0%";
+}
+document.querySelectorAll(".pbtn:not(#demobtn)").forEach(b=>b.addEventListener("click",()=>{demoRunning=false;}));
+
+// ── Custom code runner ────────────────────────────────
+let customRunning=false;
+function runCustomCode(){
+  const out=document.getElementById("runOutput");
+  const code=document.getElementById("codeEditor").value;
+  out.textContent="";
+  customRunning=false;
+  const api={
+    send:(p)=>{ sliderVals.splice(0,6,...p); p.forEach((v,i)=>{const sl=document.getElementById("sl"+i);if(sl)sl.value=v;setTileVal(i,v);}); sendPositions(); updateHandViz(sliderVals); },
+    pose:(name)=>sendPose(name),
+    sleep:(ms)=>new Promise(r=>setTimeout(r,ms)),
+    log:(msg)=>{ out.textContent+=(out.textContent?"\n":"")+String(msg); out.scrollTop=out.scrollHeight; }
+  };
+  const fn=new Function("send","pose","sleep","log",`"use strict";\n${code}`);
+  Promise.resolve(fn(api.send,api.pose,api.sleep,api.log)).catch(e=>{ out.textContent+="\nERR: "+e.message; });
+}
+connect();
+updateHandViz(sliderVals);
+window.addEventListener("resize",drawChart);
+
+// ── Row resize handle (poses ↕ chart) ────────────────
+(function(){
+  const posesEl=document.querySelector(".poses-section");
+  const rh1=document.getElementById("rh1");
+  let drag=null;
+  rh1.addEventListener("mousedown",e=>{
+    e.preventDefault();
+    rh1.classList.add("dragging");
+    drag={startY:e.clientY,startH:posesEl.offsetHeight};
+  });
+  window.addEventListener("mousemove",e=>{
+    if(!drag)return;
+    const delta=e.clientY-drag.startY;
+    const rcol=document.getElementById("rcol");
+    const newH=Math.max(100,Math.min(rcol.offsetHeight-80,drag.startH+delta));
+    posesEl.style.flex="0 0 "+newH+"px";
+    drawChart();
+  });
+  window.addEventListener("mouseup",()=>{
+    if(drag){rh1.classList.remove("dragging");drag=null;}
+  });
+})();
+
+// ── Column resize handles ─────────────────────────────
+(function(){
+  const lcol=document.getElementById("lcol");
+  const rcol=document.getElementById("rcol");
+  const ch1=document.getElementById("ch1");
+  const ch2=document.getElementById("ch2");
+  let drag=null;
+  function startDrag(e,side){
+    e.preventDefault();
+    const startX=e.clientX,startW=side==="left"?lcol.offsetWidth:document.getElementById("ccol").offsetWidth;
+    const handle=side==="left"?ch1:ch2;
+    handle.classList.add("dragging");
+    drag={side,startX,startW,handle};
+  }
+  ch1.addEventListener("mousedown",e=>startDrag(e,"left"));
+  ch2.addEventListener("mousedown",e=>startDrag(e,"right"));
+  window.addEventListener("mousemove",e=>{
+    if(!drag)return;
+    const delta=e.clientX-drag.startX;
+    if(drag.side==="left"){
+      lcol.style.width=Math.max(160,Math.min(520,drag.startW+delta))+"px";
+    } else {
+      // ch2 resizes center column
+      const ccol=document.getElementById("ccol");
+      ccol.style.width=Math.max(160,Math.min(600,drag.startW+delta))+"px";
+    }
+    drawChart();
+  });
+  window.addEventListener("mouseup",()=>{
+    if(drag){drag.handle.classList.remove("dragging");drag=null;}
+  });
+})();
+</script>
+</body>
+</html>
