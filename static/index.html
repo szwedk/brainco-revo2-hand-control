@@ -199,7 +199,6 @@ input.ftile-slider::-moz-range-thumb{
 .hand-hint{font-size:9px;color:var(--muted);margin-left:auto;letter-spacing:.03em}
 .hand-area{flex:1;position:relative;min-height:0;overflow:hidden}
 #hand-svg{position:absolute;inset:0;width:100%;height:100%}
-#particles{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
 #hand-tooltip{
   position:fixed;background:var(--surface2);border:1px solid var(--border-hi);
   border-radius:var(--r-sm);padding:6px 10px;font-size:11px;font-weight:600;color:var(--text);
@@ -303,8 +302,6 @@ canvas#chart{
 .finger-group:hover{filter:brightness(1.6) drop-shadow(0 0 6px currentColor)}
 
 /* ── Animations ──────────────────────────────────────── */
-@keyframes contactPulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(2.5);opacity:0}}
-@keyframes scanRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes breathe{0%,100%{opacity:.65}50%{opacity:1}}
 .idle-breathe{animation:breathe 3s ease-in-out infinite}
 
@@ -383,7 +380,6 @@ canvas#chart{
     </div>
     <div class="hand-area">
       <svg id="hand-svg" viewBox="-18 0 218 320" xmlns="http://www.w3.org/2000/svg"></svg>
-      <canvas id="particles"></canvas>
       <div class="mirror-pip" id="mirrorPip">
         <video id="pipVideo" autoplay muted playsinline></video>
         <canvas id="pipCanvas"></canvas>
@@ -577,22 +573,9 @@ function mkLine(x1,y1,x2,y2,extra={}){
   return mkEl("line",{x1,y1,x2,y2,...extra});
 }
 
-// SVG defs: gradients + filters
+// SVG defs: gradients
 const defs=mkEl("defs");
 handSvg.appendChild(defs);
-
-// Blur filters
-const sfilt=mkEl("filter",{id:"sf","x":"-50%","y":"-50%",width:"200%",height:"200%"});
-sfilt.appendChild(mkEl("feGaussianBlur",{stdDeviation:"2",result:"blur"}));
-defs.appendChild(sfilt);
-
-const gfilt=mkEl("filter",{id:"gf","x":"-100%","y":"-100%",width:"300%",height:"300%"});
-gfilt.appendChild(mkEl("feGaussianBlur",{stdDeviation:"5",result:"blur"}));
-defs.appendChild(gfilt);
-
-const gfilt2=mkEl("filter",{id:"gf2","x":"-200%","y":"-200%",width:"500%",height:"500%"});
-gfilt2.appendChild(mkEl("feGaussianBlur",{stdDeviation:"10",result:"blur"}));
-defs.appendChild(gfilt2);
 
 // Per-finger gradients
 const FDEFS=[
@@ -609,7 +592,7 @@ FDEFS.forEach((fd,fi)=>{
   const rad=fd.angle*Math.PI/180;
   const tx=fd.bx+Math.cos(rad)*totalLen,ty=fd.by+Math.sin(rad)*totalLen;
 
-  // Main gradient: dark root → color → bright tip
+  // Per-finger main gradient only
   const g1=mkEl("linearGradient",{id:"fg"+fi,gradientUnits:"userSpaceOnUse",
     x1:fd.bx,y1:fd.by,x2:tx,y2:ty});
   const s0=mkEl("stop",{offset:"0%","stop-color":fd.color,"stop-opacity":"0.15"});
@@ -617,15 +600,6 @@ FDEFS.forEach((fd,fi)=>{
   const s2=mkEl("stop",{offset:"100%","stop-color":FC_B[fi],"stop-opacity":"1"});
   g1.appendChild(s0);g1.appendChild(s1);g1.appendChild(s2);
   defs.appendChild(g1);
-
-  // Glow gradient: transparent → color (for force glow effect)
-  const g2=mkEl("linearGradient",{id:"fgg"+fi,gradientUnits:"userSpaceOnUse",
-    x1:fd.bx,y1:fd.by,x2:tx,y2:ty});
-  const gs0=mkEl("stop",{offset:"0%","stop-color":fd.color,"stop-opacity":"0"});
-  const gs1=mkEl("stop",{offset:"50%","stop-color":fd.color,"stop-opacity":"0.5"});
-  const gs2=mkEl("stop",{offset:"100%","stop-color":"#ffffff","stop-opacity":"0.8"});
-  g2.appendChild(gs0);g2.appendChild(gs1);g2.appendChild(gs2);
-  defs.appendChild(g2);
 });
 
 // BG group: removed (no radar)
@@ -637,16 +611,9 @@ const palmEl=mkEl("path",{
   d:"M50,170 Q38,202 43,244 Q58,274 100,278 Q142,274 157,244 Q162,202 150,170 Q138,153 118,147 Q100,143 82,147 Z",
   fill:"#101218",stroke:"#1e2130","stroke-width":"1.5"});
 handSvg.appendChild(palmEl);
-// Palm glow (behind everything, force-reactive)
-const palmGlow=mkEl("ellipse",{cx:"100",cy:"220",rx:"60",ry:"50",
-  fill:"#6c8eff",opacity:"0",filter:"url(#gf2)","pointer-events":"none"});
-handSvg.appendChild(palmGlow);
 const palmLbl=mkEl("text",{x:"100",y:"230","class":"palm-label"});
 palmLbl.textContent="Revo2Touch";
 handSvg.appendChild(palmLbl);
-
-// Effects group (ripples go here, always on top)
-const fxGrp=mkEl("g",{id:"fxgrp","pointer-events":"none"});
 
 // Build fingers
 const fingerData=[];
@@ -661,40 +628,19 @@ FDEFS.forEach((fd,fi)=>{
 
   fd.segs.forEach((len,si)=>{
     const ex=cx+dx0*len,ey=cy+dy0*len;
-    // Shadow
-    const sh=mkLine(cx,cy,ex,ey,{stroke:"#000","stroke-width":"16",
-      "stroke-linecap":"round",opacity:"0.55",filter:"url(#sf)"});
-    g.appendChild(sh);shadows.push(sh);
-    // Glow (force-driven)
-    const gl=mkLine(cx,cy,ex,ey,{stroke:"url(#fgg"+fi+")","stroke-width":"24",
-      "stroke-linecap":"round",opacity:"0",filter:"url(#gf)"});
-    g.appendChild(gl);glowBones.push(gl);
     // Main bone (gradient)
-    const b=mkLine(cx,cy,ex,ey,{stroke:"url(#fg"+fi+")","stroke-width":"11",
-      "stroke-linecap":"round",opacity:"0.45"});
+    const b=mkLine(cx,cy,ex,ey,{stroke:"url(#fg"+fi+")","stroke-width":"10",
+      "stroke-linecap":"round",opacity:"0.55"});
     g.appendChild(b);bones.push(b);
     // Knuckle
-    const k=mkEl("circle",{cx,cy,r:"5.5",fill:fd.color,opacity:"0.55",
-      stroke:"#fff","stroke-width":"0.8","stroke-opacity":"0.25"});
+    const k=mkEl("circle",{cx,cy,r:"5",fill:fd.color,opacity:"0.5",
+      stroke:"rgba(255,255,255,.15)","stroke-width":"0.8"});
     g.appendChild(k);knuckles.push(k);
     cx=ex;cy=ey;
   });
 
-  // Tip elements (cx,cy = tip now)
-  const tipGlow=mkEl("ellipse",{cx,cy,rx:"22",ry:"22",
-    fill:fd.color,opacity:"0",filter:"url(#gf)",id:"tglow"+fi,"pointer-events":"none"});
-  g.insertBefore(tipGlow,g.firstChild); // behind bones
-
-  const tipRing=mkEl("circle",{cx,cy,r:"12",fill:"none",
-    stroke:fd.color,"stroke-width":"1.5",opacity:"0.25"});
-  g.appendChild(tipRing);
-
-  const tipCirc=mkEl("circle",{cx,cy,r:"8",fill:fd.color,opacity:"0.25",id:"tip"+fi});
+  const tipCirc=mkEl("circle",{cx,cy,r:"7",fill:fd.color,opacity:"0.35",id:"tip"+fi});
   g.appendChild(tipCirc);
-
-  // Energy dot
-  const edot=mkEl("circle",{cx,cy,r:"3",fill:"#fff",opacity:"0"});
-  g.appendChild(edot);
 
   // Finger label (outside group)
   const lbl=mkEl("text",{
@@ -706,10 +652,8 @@ FDEFS.forEach((fd,fi)=>{
   handSvg.appendChild(lbl);
 
   tipPos[fi]={x:cx,y:cy};
-  fingerData.push({shadows,glowBones,bones,knuckles,tipGlow,tipRing,tipCirc,edot,fdef:fd});
+  fingerData.push({bones,knuckles,tipCirc,fdef:fd});
 });
-
-handSvg.appendChild(fxGrp);
 
 // ── updateHandViz ─────────────────────────────────────
 function updateHandViz(vals){
@@ -727,49 +671,23 @@ function updateHandViz(vals){
       const segCurl=(si===0?.4:si===1?.55:.45)*maxCurl*frac;
       angle+=(si===0?0:segCurl);
       const ex=cx+Math.cos(angle)*len,ey=cy+Math.sin(angle)*len;
-      const setLn=(el)=>{
-        el.setAttribute("x1",cx.toFixed(1));el.setAttribute("y1",cy.toFixed(1));
-        el.setAttribute("x2",ex.toFixed(1));el.setAttribute("y2",ey.toFixed(1));
-      };
-      setLn(fd_i.shadows[si]);setLn(fd_i.glowBones[si]);setLn(fd_i.bones[si]);
-      fd_i.bones[si].setAttribute("opacity",(0.3+frac*.55).toFixed(2));
-      fd_i.glowBones[si].setAttribute("opacity",(f*.7).toFixed(2));
+      fd_i.bones[si].setAttribute("x1",cx.toFixed(1));fd_i.bones[si].setAttribute("y1",cy.toFixed(1));
+      fd_i.bones[si].setAttribute("x2",ex.toFixed(1));fd_i.bones[si].setAttribute("y2",ey.toFixed(1));
+      fd_i.bones[si].setAttribute("opacity",(0.35+frac*.5).toFixed(2));
       fd_i.knuckles[si].setAttribute("cx",cx.toFixed(1));
       fd_i.knuckles[si].setAttribute("cy",cy.toFixed(1));
-      fd_i.knuckles[si].setAttribute("opacity",(0.45+frac*.45).toFixed(2));
       if(si===0)angle+=segCurl;
       cx=ex;cy=ey;
     });
 
     tipPos[fi]={x:cx,y:cy};
-    const setPos=(el)=>{el.setAttribute("cx",cx.toFixed(1));el.setAttribute("cy",cy.toFixed(1));};
-    setPos(fd_i.tipGlow);setPos(fd_i.tipCirc);setPos(fd_i.tipRing);
+    fd_i.tipCirc.setAttribute("cx",cx.toFixed(1));fd_i.tipCirc.setAttribute("cy",cy.toFixed(1));
+    fd_i.tipCirc.setAttribute("opacity",(0.25+frac*.45).toFixed(2));
 
-    // Force-reactive tip
-    const tipR=7+f*8;
-    const tipCol=f>0.6?"#ff4060":f>0.3?"#ffd166":fd.color;
-    fd_i.tipCirc.setAttribute("r",tipR.toFixed(1));
-    fd_i.tipCirc.setAttribute("fill",tipCol);
-    fd_i.tipCirc.setAttribute("opacity",(0.2+frac*.5+f*.3).toFixed(2));
-    fd_i.tipRing.setAttribute("cx",cx.toFixed(1));fd_i.tipRing.setAttribute("cy",cy.toFixed(1));
-    fd_i.tipRing.setAttribute("r",(tipR+5).toFixed(1));
-    fd_i.tipRing.setAttribute("stroke",tipCol);
-    fd_i.tipRing.setAttribute("opacity",(0.15+f*.5).toFixed(2));
-    fd_i.tipGlow.setAttribute("opacity",(f*.65).toFixed(2));
-
-    // Update gradient endpoints to match current tip
-    const setGrad=(id)=>{
-      const gr=document.getElementById(id);
-      if(!gr)return;
-      gr.setAttribute("x1",fd.bx.toFixed(1));gr.setAttribute("y1",fd.by.toFixed(1));
-      gr.setAttribute("x2",cx.toFixed(1));gr.setAttribute("y2",cy.toFixed(1));
-    };
-    setGrad("fg"+fi);setGrad("fgg"+fi);
+    // Update gradient endpoints
+    const gr=document.getElementById("fg"+fi);
+    if(gr){gr.setAttribute("x2",cx.toFixed(1));gr.setAttribute("y2",cy.toFixed(1));}
   });
-
-  // Palm glow = average force
-  const avgF=forceLevel.reduce((s,v)=>s+v,0)/5;
-  palmGlow.setAttribute("opacity",(avgF*.4).toFixed(2));
 }
 
 // ── interactions ──────────────────────────────────────
@@ -798,7 +716,6 @@ FDEFS.forEach((fd,fi)=>{
     document.getElementById("sl"+fd.si).value=v;
     setTileVal(fd.si,v);
     sendPositions();updateHandViz(sliderVals);
-    emitParticles(fi,10);
   });
 
   // Scroll to adjust
@@ -855,131 +772,7 @@ document.addEventListener("keydown",e=>{
   if(pose){e.preventDefault();sendPose(pose);}
 });
 
-// ── Particle + Ripple + Energy system ─────────────────
-const pCanvas=document.getElementById("particles");
-const pCtx=pCanvas.getContext("2d");
-const particles=[];
-const ripples=[];
 const DPR=window.devicePixelRatio||1;
-
-// Energy dot phases
-const energyPhase=FDEFS.map((_,i)=>i*0.22);
-const energySpeed=0.015;
-
-function svgToCanvas(sx,sy){
-  const sr=handSvg.getBoundingClientRect();
-  const pr=pCanvas.getBoundingClientRect();
-  const scX=sr.width/200,scY=sr.height/320;
-  return{x:(sr.left-pr.left)+sx*scX,y:(sr.top-pr.top)+sy*scY};
-}
-
-function emitParticles(fi,count){
-  const tp=tipPos[fi];
-  const {x,y}=svgToCanvas(tp.x,tp.y);
-  const col=FC[fi];
-  for(let i=0;i<count;i++){
-    const a=Math.random()*Math.PI*2,s=0.4+Math.random()*3;
-    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-0.8,col,
-      alpha:1,size:1+Math.random()*2.5,life:1,decay:0.022+Math.random()*0.02});
-  }
-}
-
-function emitRipple(fi){
-  const tp=tipPos[fi];
-  const el=mkEl("circle",{cx:tp.x.toFixed(1),cy:tp.y.toFixed(1),
-    r:"9",fill:"none",stroke:FC[fi],"stroke-width":"2",opacity:"0.9"});
-  fxGrp.appendChild(el);
-  ripples.push({el,r:9,alpha:0.9,fi});
-}
-
-function flashFinger(fi){
-  const g=document.getElementById("fg"+fi);
-  if(!g)return;
-  g.style.filter="brightness(3.5)";
-  setTimeout(()=>g.style.filter="brightness(1.5)",120);
-  setTimeout(()=>g.style.filter="brightness(2.5)",200);
-  setTimeout(()=>g.style.filter="",380);
-}
-
-function getFingerPosAt(fi,phase){
-  const fd=FDEFS[fi];
-  const frac=(sliderVals[fd.si]||0)/1000;
-  const rad=fd.angle*Math.PI/180,maxCurl=1.4;
-  const total=fd.segs.reduce((s,l)=>s+l,0);
-  let dist=phase*total,cx=fd.bx,cy=fd.by,angle=rad;
-  for(let si=0;si<fd.segs.length;si++){
-    const len=fd.segs[si];
-    const sc=(si===0?.4:si===1?.55:.45)*maxCurl*frac;
-    if(si>0)angle+=sc;
-    const step=Math.min(dist,len);
-    cx+=Math.cos(angle)*step;cy+=Math.sin(angle)*step;
-    if(si===0)angle+=sc;
-    dist-=step;
-    if(dist<=0)break;
-  }
-  return{x:cx,y:cy};
-}
-
-let scanAngle=0; // kept to avoid reference errors (scan removed)
-function animLoop(){
-  // Resize canvas
-  const pr=pCanvas.parentElement.getBoundingClientRect();
-  const w=pr.width,h=pr.height;
-  if(Math.round(pCanvas.width)!==Math.round(w*DPR)){
-    pCanvas.width=Math.round(w*DPR);pCanvas.height=Math.round(h*DPR);
-  }
-  pCtx.setTransform(DPR,0,0,DPR,0,0);
-  pCtx.clearRect(0,0,w,h);
-
-  // Particles
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.x+=p.vx;p.y+=p.vy;p.vy+=0.06;p.life-=p.decay;
-    if(p.life<=0){particles.splice(i,1);continue;}
-    pCtx.globalAlpha=p.life*.85;
-    pCtx.fillStyle=p.col;
-    pCtx.beginPath();pCtx.arc(p.x,p.y,p.size*Math.max(p.life,.1),0,Math.PI*2);
-    pCtx.fill();
-  }
-  pCtx.globalAlpha=1;
-
-  // Ripples (SVG)
-  for(let i=ripples.length-1;i>=0;i--){
-    const r=ripples[i];
-    r.r+=2.2;r.alpha-=0.028;
-    if(r.alpha<=0){r.el.remove();ripples.splice(i,1);continue;}
-    const tp=tipPos[r.fi];
-    r.el.setAttribute("cx",tp.x.toFixed(1));
-    r.el.setAttribute("cy",tp.y.toFixed(1));
-    r.el.setAttribute("r",r.r.toFixed(1));
-    r.el.setAttribute("opacity",r.alpha.toFixed(2));
-  }
-
-  // Energy dots
-  FDEFS.forEach((fd,fi)=>{
-    const frac=(sliderVals[fd.si]||0)/1000;
-    const f=forceLevel[fi];
-    const active=frac>0.05||f>0.05;
-    const edot=fingerData[fi].edot;
-    if(active){
-      energyPhase[fi]=(energyPhase[fi]+energySpeed*(0.5+frac*2.5))%1;
-      const pos=getFingerPosAt(fi,energyPhase[fi]);
-      edot.setAttribute("cx",pos.x.toFixed(1));
-      edot.setAttribute("cy",pos.y.toFixed(1));
-      edot.setAttribute("r",(2+frac*1.5).toFixed(1));
-      const ec=f>0.6?"#ff4060":f>0.25?"#ffd166":"#ffffff";
-      edot.setAttribute("fill",ec);
-      edot.setAttribute("opacity",(0.4+frac*.5+f*.3).toFixed(2));
-    } else {
-      edot.setAttribute("opacity","0");
-    }
-  });
-
-  // (scan removed)
-
-  requestAnimationFrame(animLoop);
-}
-animLoop();
 
 // ── Tactile update ─────────────────────────────────────
 function updateTactile(touch){
@@ -1005,13 +798,7 @@ function updateTactile(touch){
     dot.className="sdot"+(t.status===1?" w":t.status===2?" e":"");
     document.getElementById("fc"+i).classList.toggle("contact",nf>50);
 
-    // Contact events
-    if(forceLevel[i]>0.02&&prevForce[i]<=0.02){
-      emitRipple(i);emitParticles(i,6);
-    }
-    if(forceLevel[i]>0.4&&prevForce[i]<=0.4){
-      emitRipple(i);emitParticles(i,16);flashFinger(i);
-    }
+
   });
 }
 
