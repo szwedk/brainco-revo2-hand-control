@@ -1005,7 +1005,7 @@ let mirrorActive = false;
 let handsModel   = null;
 let mirrorStream = null;
 let emaVals      = null;
-let mirrorAlpha  = 0.15;
+let mirrorAlpha  = 0.2;
 
 function _vecAngle(a, b) {
   const dot = a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
@@ -1048,9 +1048,6 @@ function emaUpdate(raw) {
   return [...emaVals];
 }
 function applyMirrorPositions(pos) {
-  // Dead-zone: skip if max change across all fingers < 12
-  const maxDelta = pos.reduce((m,v,i)=>Math.max(m,Math.abs(v-sliderVals[i])),0);
-  if (maxDelta < 12) return;
   pos.forEach((v,i) => {
     sliderVals[i] = v;
     const sl = document.getElementById("sl"+i);
