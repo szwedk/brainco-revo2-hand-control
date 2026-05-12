@@ -927,7 +927,7 @@ function connect(){
     const d=JSON.parse(e.data);
     if(d.device_info&&!devinfo.textContent)devinfo.textContent=d.device_info;
     if(!d.connected)return;
-    if(d.positions&&!dragState){
+    if(d.positions&&!dragState&&!mirrorActive){
       d.positions.forEach((p,i)=>{
         const sl=document.getElementById("sl"+i);
         if(sl&&document.activeElement!==sl){sl.value=p;sliderVals[i]=p;setTileVal(i,p);}
@@ -1015,12 +1015,12 @@ function _curl(lm, j) {
   const v0 = p[0].map((_,k) => p[1][k]-p[0][k]);
   const v1 = p[1].map((_,k) => p[2][k]-p[1][k]);
   const v2 = p[2].map((_,k) => p[3][k]-p[2][k]);
-  return Math.min((_vecAngle(v0.map(v=>-v),v1) + _vecAngle(v1.map(v=>-v),v2)) / 160, 1);
+  return Math.min((_vecAngle(v0,v1) + _vecAngle(v1,v2)) / 160, 1);
 }
 function _thumbCurl(lm) {
   const p = [1,2,3,4].map(i => [lm[i].x,lm[i].y,lm[i].z]);
   const v0=p[0].map((_,k)=>p[1][k]-p[0][k]),v1=p[1].map((_,k)=>p[2][k]-p[1][k]),v2=p[2].map((_,k)=>p[3][k]-p[2][k]);
-  return Math.min((_vecAngle(v0.map(v=>-v),v1)+_vecAngle(v1.map(v=>-v),v2))/140, 1);
+  return Math.min((_vecAngle(v0,v1)+_vecAngle(v1,v2))/140, 1);
 }
 function _thumbAux(lm) {
   const tip=[lm[4].x,lm[4].y,lm[4].z], idx=[lm[5].x,lm[5].y,lm[5].z];
