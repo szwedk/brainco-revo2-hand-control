@@ -160,6 +160,32 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
 @keyframes scanRotate{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 @keyframes breathe{0%,100%{opacity:.7}50%{opacity:1}}
 .idle-breathe{animation:breathe 3s ease-in-out infinite}
+
+/* Mirror Mode */
+#mirrorBtn{padding:3px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--border);
+  color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .25s;white-space:nowrap}
+#mirrorBtn:hover{border-color:var(--accent);color:var(--accent)}
+#mirrorBtn.active{background:color-mix(in srgb,var(--accent) 15%,var(--surface));
+  border-color:var(--accent);color:var(--accent)}
+#mirrorBtn.active .dot{display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--red);box-shadow:0 0 6px var(--red);margin-right:4px;
+  animation:breathe .9s ease-in-out infinite}
+#mirrorBtn .dot{display:none}
+.mirror-pip{position:absolute;bottom:12px;right:12px;width:200px;height:150px;
+  border-radius:10px;overflow:hidden;border:2px solid var(--accent);z-index:20;
+  display:none;box-shadow:0 4px 24px rgba(108,142,255,.35)}
+.mirror-pip.active{display:block}
+#pipVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+#pipCanvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mirror-badge{position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:color-mix(in srgb,var(--accent) 18%,var(--bg));border:1px solid var(--accent);
+  border-radius:20px;padding:3px 14px;font-size:9px;font-weight:800;color:var(--accent);
+  letter-spacing:.1em;text-transform:uppercase;display:none;z-index:20;pointer-events:none}
+.mirror-badge.active{display:block}
+.mirror-smoothing{display:flex;align-items:center;gap:6px;font-size:9px;color:var(--muted);
+  flex-shrink:0;margin-left:auto}
+.mirror-smoothing label{cursor:pointer;color:var(--muted)}
+.mirror-smoothing input{width:60px;cursor:pointer;accent-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -175,6 +201,7 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
   <h1>BrainCo Revo2Touch</h1>
   <span class="badge" id="cbadge">Connecting&#x2026;</span>
   <span id="devinfo" style="font-size:10px;color:var(--muted);margin-left:4px"></span>
+  <button id="mirrorBtn" onclick="toggleMirror()"><span class="dot"></span>📷 Mirror</button>
   <span class="hz" id="hzlbl">&#x2014; Hz</span>
 </header>
 
@@ -203,6 +230,11 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
     <div class="hand-area">
       <svg id="hand-svg" viewBox="-18 0 218 320" xmlns="http://www.w3.org/2000/svg"></svg>
       <canvas id="particles"></canvas>
+      <div class="mirror-pip" id="mirrorPip">
+        <video id="pipVideo" autoplay muted playsinline></video>
+        <canvas id="pipCanvas"></canvas>
+      </div>
+      <div class="mirror-badge" id="mirrorBadge">◉ Mirror Active</div>
     </div>
   </div>
 
@@ -276,6 +308,7 @@ run();</textarea>
 </div>
 <div id="hand-tooltip"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 <script>
 const FN   = ["Thumb","Index","Middle","Ring","Pinky"];
 const FC   = ["#a78bfa","#60a5fa","#34d399","#fbbf24","#f87171"];
@@ -964,6 +997,179 @@ function runCustomCode(){
   const fn=new Function("send","pose","sleep","log",`"use strict";\n${code}`);
   Promise.resolve(fn(api.send,api.pose,api.sleep,api.log)).catch(e=>{ out.textContent+="\nERR: "+e.message; });
 }
+// ── Mirror Mode (MediaPipe Hands in-browser) ──────────
+let mirrorActive = false;
+let handsModel   = null;
+let mirrorStream = null;
+let emaVals      = null;
+let mirrorAlpha  = 0.35;
+
+function _vecAngle(a, b) {
+  const dot = a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+  const na  = Math.hypot(...a), nb = Math.hypot(...b);
+  if (na < 1e-6 || nb < 1e-6) return 0;
+  return Math.acos(Math.max(-1, Math.min(1, dot/(na*nb)))) * 180 / Math.PI;
+}
+function _curl(lm, j) {
+  const p = j.map(i => [lm[i].x, lm[i].y, lm[i].z]);
+  const v0 = p[0].map((_,k) => p[1][k]-p[0][k]);
+  const v1 = p[1].map((_,k) => p[2][k]-p[1][k]);
+  const v2 = p[2].map((_,k) => p[3][k]-p[2][k]);
+  return Math.min((_vecAngle(v0.map(v=>-v),v1) + _vecAngle(v1.map(v=>-v),v2)) / 160, 1);
+}
+function _thumbCurl(lm) {
+  const p = [1,2,3,4].map(i => [lm[i].x,lm[i].y,lm[i].z]);
+  const v0=p[0].map((_,k)=>p[1][k]-p[0][k]),v1=p[1].map((_,k)=>p[2][k]-p[1][k]),v2=p[2].map((_,k)=>p[3][k]-p[2][k]);
+  return Math.min((_vecAngle(v0.map(v=>-v),v1)+_vecAngle(v1.map(v=>-v),v2))/140, 1);
+}
+function _thumbAux(lm) {
+  const tip=[lm[4].x,lm[4].y,lm[4].z], idx=[lm[5].x,lm[5].y,lm[5].z];
+  const w=[lm[0].x,lm[0].y,lm[0].z], mid=[lm[9].x,lm[9].y,lm[9].z];
+  const sz = Math.hypot(...w.map((_,k)=>mid[k]-w[k])) + 1e-6;
+  return Math.max(0, Math.min(1, 1-(Math.hypot(...tip.map((_,k)=>idx[k]-tip[k]))/sz - 0.2)/0.5));
+}
+function lmToPositions(lm) {
+  return [
+    Math.round(_thumbCurl(lm)*1000),
+    Math.round(_thumbAux(lm)*1000),
+    Math.round(_curl(lm,[5,6,7,8])*1000),
+    Math.round(_curl(lm,[9,10,11,12])*1000),
+    Math.round(_curl(lm,[13,14,15,16])*1000),
+    Math.round(_curl(lm,[17,18,19,20])*1000),
+  ];
+}
+function emaUpdate(raw) {
+  const a = mirrorAlpha;
+  if (!emaVals) { emaVals = [...raw]; return [...raw]; }
+  emaVals = raw.map((v,i) => Math.round(a*v + (1-a)*emaVals[i]));
+  return [...emaVals];
+}
+function applyMirrorPositions(pos) {
+  pos.forEach((v,i) => {
+    sliderVals[i] = v;
+    const sl = document.getElementById("sl"+i);
+    if (sl) sl.value = v;
+    setTileVal(i, v);
+  });
+  sendPositions();
+  updateHandViz(sliderVals);
+}
+
+// Draw skeleton on PIP canvas (coords are mirrored to match flipped video)
+const MP_CONNECTIONS = [
+  [0,1],[1,2],[2,3],[3,4],
+  [0,5],[5,6],[6,7],[7,8],
+  [0,9],[9,10],[10,11],[11,12],
+  [0,13],[13,14],[14,15],[15,16],
+  [0,17],[17,18],[18,19],[19,20],
+  [5,9],[9,13],[13,17],
+];
+const FINGER_TIP_IDX = new Set([4,8,12,16,20]);
+function drawSkeleton(ctx, lm, w, h) {
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(108,142,255,0.75)";
+  const pt = j => ({ x:(1-lm[j].x)*w, y:lm[j].y*h });
+  MP_CONNECTIONS.forEach(([a,b]) => {
+    const pa=pt(a), pb=pt(b);
+    ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+  });
+  lm.forEach((_,j) => {
+    const {x,y} = pt(j);
+    const isTip = FINGER_TIP_IDX.has(j);
+    ctx.beginPath();
+    ctx.arc(x, y, isTip ? 4 : 2.5, 0, Math.PI*2);
+    ctx.fillStyle = isTip ? "#a78bfa" : "rgba(255,255,255,0.85)";
+    ctx.fill();
+  });
+}
+
+async function initHandsModel() {
+  if (handsModel) return;
+  handsModel = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+  handsModel.setOptions({ maxNumHands:1, modelComplexity:1, minDetectionConfidence:0.6, minTrackingConfidence:0.5 });
+  const pipCanvas = document.getElementById("pipCanvas");
+  const pipCtx    = pipCanvas.getContext("2d");
+  handsModel.onResults(results => {
+    const w = pipCanvas.width, h = pipCanvas.height;
+    pipCtx.clearRect(0, 0, w, h);
+    if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+      const lm = results.multiHandLandmarks[0];
+      drawSkeleton(pipCtx, lm, w, h);
+      applyMirrorPositions(emaUpdate(lmToPositions(lm)));
+    } else {
+      applyMirrorPositions(emaUpdate([0,0,0,0,0,0]));
+    }
+  });
+  await new Promise((res, rej) => {
+    handsModel.initialize().then(res).catch(rej);
+  });
+}
+
+async function toggleMirror() {
+  const btn   = document.getElementById("mirrorBtn");
+  const pip   = document.getElementById("mirrorPip");
+  const badge = document.getElementById("mirrorBadge");
+  const video = document.getElementById("pipVideo");
+
+  if (mirrorActive) {
+    mirrorActive = false;
+    if (mirrorStream) { mirrorStream.getTracks().forEach(t=>t.stop()); mirrorStream=null; }
+    pip.classList.remove("active");
+    badge.classList.remove("active");
+    btn.classList.remove("active");
+    btn.innerHTML = '<span class="dot"></span>📷 Mirror';
+    emaVals = null;
+    return;
+  }
+
+  btn.innerHTML = '📷 Starting…';
+  btn.disabled = true;
+  try {
+    mirrorStream = await navigator.mediaDevices.getUserMedia({
+      video: { width:320, height:240, facingMode:"user" }, audio:false
+    });
+    video.srcObject = mirrorStream;
+    await video.play();
+    await initHandsModel();
+    mirrorActive = true;
+    pip.classList.add("active");
+    badge.classList.add("active");
+    btn.classList.add("active");
+    btn.innerHTML = '<span class="dot"></span>📷 Stop';
+    btn.disabled = false;
+    const pipCanvas = document.getElementById("pipCanvas");
+    async function mirrorFrame() {
+      if (!mirrorActive) return;
+      if (video.readyState >= 2) {
+        pipCanvas.width  = video.videoWidth  || 320;
+        pipCanvas.height = video.videoHeight || 240;
+        await handsModel.send({ image: video });
+      }
+      requestAnimationFrame(mirrorFrame);
+    }
+    requestAnimationFrame(mirrorFrame);
+  } catch(e) {
+    btn.innerHTML = '<span class="dot"></span>📷 Mirror';
+    btn.disabled = false;
+    badge.textContent = "Camera denied";
+    badge.style.color = "var(--red)";
+    badge.style.borderColor = "var(--red)";
+    badge.classList.add("active");
+    setTimeout(() => {
+      badge.classList.remove("active");
+      badge.textContent = "\u25c9 Mirror Active";
+      badge.style.color = "";
+      badge.style.borderColor = "";
+    }, 3000);
+  }
+}
+
+// Disable finger manual interaction while mirror active (allow it to pass through)
+const _origMousedown = window.onmousedown;
+document.getElementById("hand-svg").addEventListener("mousedown", e => {
+  if (mirrorActive) { e.stopImmediatePropagation(); }
+}, true);
+
 connect();
 updateHandViz(sliderVals);
 window.addEventListener("resize",drawChart);
