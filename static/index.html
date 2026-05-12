@@ -35,8 +35,8 @@ header h1{font-size:13px;font-weight:700;letter-spacing:.05em}
 .col-handle:hover,.col-handle.dragging{background:var(--accent)}
 
 /* LEFT: sensor + finger tiles */
-.left-col{display:flex;flex-direction:column;gap:1px;background:var(--border);overflow:hidden;min-height:0;flex-shrink:0}
-.sensor-panel{background:var(--bg);flex:2;padding:10px 14px;display:flex;flex-direction:column;overflow:hidden}
+.left-col{display:flex;flex-direction:column;gap:8px;background:var(--bg);padding:8px 0;overflow:hidden;min-height:0;flex-shrink:0}
+.sensor-panel{background:var(--bg);flex:1;padding:0 14px;display:flex;flex-direction:column;overflow:hidden;min-height:0}
 .fingers-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
   gap:7px;flex:1;min-height:0}
 .fc{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--c);
@@ -66,7 +66,7 @@ header h1{font-size:13px;font-weight:700;letter-spacing:.05em}
   background:linear-gradient(90deg,var(--c,var(--accent)),transparent);transition:width .1s}
 .prox-lbl{display:flex;justify-content:space-between;font-size:8px;color:var(--muted);margin-top:2px}
 
-.finger-panel{background:var(--bg);flex:1;min-height:0;padding:10px 14px;display:flex;flex-direction:column;overflow:hidden}
+.finger-panel{background:var(--bg);flex:1;min-height:0;padding:0 14px;display:flex;flex-direction:column;overflow:hidden}
 .finger-tiles{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);
   gap:7px;flex:1;min-height:0}
 .ftile{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--c);
@@ -107,12 +107,12 @@ input.ftile-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
   box-shadow:0 4px 16px rgba(0,0,0,.6)}
 
 /* RIGHT: poses + chart */
-.right-col{display:flex;flex-direction:column;gap:1px;background:var(--border);overflow:hidden;min-height:0;flex-shrink:0}
-.poses-section{background:var(--bg);flex:1;min-height:120px;padding:0;display:flex;flex-direction:row;overflow:hidden;gap:1px}
+.right-col{display:flex;flex-direction:column;gap:8px;background:var(--bg);padding:8px 0;overflow:hidden;min-height:0;flex-shrink:0}
+.poses-section{background:var(--bg);flex:1;min-height:120px;padding:0;display:flex;flex-direction:row;overflow:hidden;gap:8px}
 .row-handle{height:5px;background:var(--border);cursor:row-resize;flex-shrink:0;transition:background .15s;user-select:none;-webkit-user-select:none}
 .row-handle:hover,.row-handle.dragging{background:var(--accent)}
-.poses-left{padding:10px 14px;display:flex;flex-direction:column;overflow-y:auto;flex:1;min-width:0;scrollbar-width:thin}
-.poses-right{padding:10px 14px;display:flex;flex-direction:column;overflow:hidden;flex:1;min-width:0;background:var(--bg)}
+.poses-left{padding:0 14px;display:flex;flex-direction:column;overflow-y:auto;flex:1;min-width:0;scrollbar-width:thin}
+.poses-right{padding:0 14px;display:flex;flex-direction:column;overflow:hidden;flex:1;min-width:0;background:var(--bg)}
 .pose-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;flex:1}
 .pbtn{padding:8px 4px;border-radius:8px;background:var(--surface);
   border:1px solid var(--border);color:var(--text);font-size:10px;font-weight:700;
@@ -142,7 +142,7 @@ input.ftile-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;
 .run-output{margin-top:5px;font-size:10px;color:var(--muted);font-family:monospace;
   max-height:48px;overflow-y:auto;flex-shrink:0;line-height:1.4;word-break:break-all}
 
-.chart-section{background:var(--bg);flex:1;min-height:80px;padding:10px 14px;display:flex;flex-direction:column;overflow:hidden}
+.chart-section{background:var(--bg);flex:1;min-height:80px;padding:0 14px;display:flex;flex-direction:column;overflow:hidden}
 .chart-wrap{flex:1;position:relative;min-height:0}
 canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
   background:var(--surface);border:1px solid var(--border)}
@@ -210,11 +210,11 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
   <!-- LEFT: sensor + finger tiles -->
   <div class="left-col" id="lcol" style="width:255px">
     <div class="sensor-panel">
-      <div class="ptitle">Tactile Sensors</div>
+      <div class="ptitle" style="padding:10px 0 0">Tactile Sensors</div>
       <div class="fingers-grid" id="fgrid"></div>
     </div>
     <div class="finger-panel">
-      <div class="ptitle">Finger Control</div>
+      <div class="ptitle" style="padding:10px 0 0">Finger Control</div>
       <div class="finger-tiles" id="ftiles"></div>
     </div>
   </div>
@@ -244,7 +244,7 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
   <div class="right-col" id="rcol" style="flex:1;min-width:200px">
     <div class="poses-section">
       <div class="poses-left">
-        <div class="ptitle">Poses</div>
+        <div class="ptitle" style="padding:10px 0 0">Poses</div>
         <div class="pose-grid">
           <button class="pbtn" onclick="sendPose('open')"><span class="em">&#x1f590;&#xfe0f;</span>Open</button>
           <button class="pbtn" onclick="sendPose('fist')"><span class="em">&#x270a;</span>Fist</button>
@@ -270,7 +270,7 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:7px;
         </div>
       </div>
       <div class="poses-right" style="border-left:1px solid var(--border)">
-        <div class="ptitle">Custom Code</div>
+        <div class="ptitle" style="padding:10px 0 0">Custom Code</div>
         <textarea class="code-editor" id="codeEditor" spellcheck="false">// positions: [thumb,thaux,index,middle,ring,pinky] 0-1000
 // send(positions) — send to hand
 // pose(name) — run a named pose
@@ -297,7 +297,7 @@ run();</textarea>
     </div>
     <div class="row-handle" id="rh1"></div>
     <div class="chart-section">
-      <div class="ptitle">Force History (2500 N scale)</div>
+      <div class="ptitle" style="padding:10px 0 0">Force History (2500 N scale)</div>
       <div class="chart-wrap">
         <canvas id="chart"></canvas>
       </div>
@@ -1100,9 +1100,7 @@ async function initHandsModel() {
       applyMirrorPositions(emaUpdate([0,0,0,0,0,0]));
     }
   });
-  await new Promise((res, rej) => {
-    handsModel.initialize().then(res).catch(rej);
-  });
+  // No explicit initialize() — MediaPipe initializes lazily on first send()
 }
 
 async function toggleMirror() {
@@ -1123,14 +1121,14 @@ async function toggleMirror() {
   }
 
   btn.innerHTML = '📷 Starting…';
-  btn.disabled = true;
+  // Don't disable — allow cancel by clicking again
   try {
     mirrorStream = await navigator.mediaDevices.getUserMedia({
       video: { width:320, height:240, facingMode:"user" }, audio:false
     });
     video.srcObject = mirrorStream;
     await video.play();
-    await initHandsModel();
+    initHandsModel(); // sync — model loads lazily on first frame
     mirrorActive = true;
     pip.classList.add("active");
     badge.classList.add("active");
