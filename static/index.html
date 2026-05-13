@@ -286,6 +286,53 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:var(
 /* Drawer resize handle */
 .drawer-handle{height:3px;background:var(--border);cursor:row-resize;flex-shrink:0;transition:background .12s;user-select:none;-webkit-user-select:none}
 .drawer-handle:hover,.drawer-handle.dragging{background:var(--accent)}
+
+/* gesture classifier */
+.classifier-panel{position:absolute;inset:0;padding:14px;display:none;gap:12px;flex-direction:column;overflow:auto}
+.classifier-panel.active{display:flex}
+.cls-top{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;flex-shrink:0}
+.cls-status{flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.cls-pred-label{font-size:11px;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.cls-pred-name{font-size:30px;font-weight:700;font-family:var(--mono);color:var(--accent);line-height:1;letter-spacing:-.02em;transition:color .2s}
+.cls-pred-conf{font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:2px}
+.cls-conf-bar{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-top:4px}
+.cls-conf-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .15s}
+.cls-info{font-size:9px;color:var(--text3);margin-top:4px;line-height:1.5}
+.cls-controls{display:flex;flex-direction:column;gap:7px;flex-shrink:0}
+.cls-k-row{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text2)}
+.cls-k-row input{width:50px;background:var(--surface2);border:1px solid var(--border-hi);border-radius:4px;color:var(--text);padding:2px 6px;font-family:var(--mono);font-size:10px;outline:none;text-align:center}
+.cls-k-row input:focus{border-color:var(--border-focus)}
+.cls-candidates{display:flex;flex-direction:column;gap:4px;flex:1;overflow:auto}
+.cls-cand{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);transition:border-color .12s}
+.cls-cand.top1{border-color:rgba(124,110,255,.4);background:var(--accent-dim)}
+.cls-cand-name{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--text);min-width:90px}
+.cls-cand-bar-wrap{flex:1;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.cls-cand-bar{height:100%;border-radius:4px;background:var(--accent);transition:width .15s}
+.cls-cand-pct{font-size:9px;font-family:var(--mono);color:var(--text2);min-width:34px;text-align:right}
+
+/* pose sequencer */
+.sequencer-panel{position:absolute;inset:0;padding:14px;display:none;gap:10px;flex-direction:column;overflow:hidden}
+.sequencer-panel.active{display:flex}
+.seq-toolbar{display:flex;align-items:center;gap:7px;flex-shrink:0;flex-wrap:wrap}
+.seq-add-row{display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)}
+.seq-select{height:26px;border-radius:4px;background:var(--surface3);border:1px solid var(--border-hi);color:var(--text);padding:0 8px;font-family:var(--mono);font-size:10.5px;outline:none;cursor:pointer}
+.seq-select:focus{border-color:var(--border-focus)}
+.seq-dur-input{width:60px;height:26px;border-radius:4px;background:var(--surface3);border:1px solid var(--border-hi);color:var(--text);padding:0 6px;font-family:var(--mono);font-size:10.5px;outline:none;text-align:center}
+.seq-dur-input:focus{border-color:var(--border-focus)}
+.seq-timeline{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:4px;min-height:0;padding-right:2px}
+.seq-step{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);transition:all .12s;cursor:default;position:relative;overflow:hidden}
+.seq-step:hover{border-color:var(--border-hi)}
+.seq-step.active-step{border-color:var(--accent);background:var(--accent-dim)}
+.seq-step.active-step::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);border-radius:3px 0 0 3px}
+.seq-step-idx{font-family:var(--mono);font-size:8.5px;color:var(--text3);min-width:18px}
+.seq-step-name{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text);min-width:72px}
+.seq-step-dur{font-size:9px;font-family:var(--mono);color:var(--text2);min-width:44px}
+.seq-step-bar{flex:1;height:3px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.seq-step-prog{height:100%;border-radius:3px;background:var(--accent);width:0%;transition:width .1s linear}
+.seq-step-del{margin-left:auto;cursor:pointer;color:var(--text3);font-size:10px;padding:2px 5px;transition:color .12s;background:none;border:none;font-family:inherit}
+.seq-step-del:hover{color:var(--red)}
+.seq-playbar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
+.seq-playbar-fill{height:100%;background:var(--accent);width:0%;transition:width .1s linear}
 </style>
 </head>
 <body>
@@ -471,6 +518,12 @@ run();</textarea>
     <div class="dev-tab" data-tab="export" onclick="switchTab('export')">
       Export
     </div>
+    <div class="dev-tab" data-tab="classifier" onclick="switchTab('classifier')">
+      Classifier <span class="dev-tab-badge" id="clsBadge">0</span>
+    </div>
+    <div class="dev-tab" data-tab="sequencer" onclick="switchTab('sequencer')">
+      Sequencer
+    </div>
     <div class="dev-tab-actions">
       <button class="dev-mini-btn" id="drawerToggleBtn" onclick="toggleDrawer()">&#9660; Collapse</button>
     </div>
@@ -533,10 +586,59 @@ run();</textarea>
         <div class="export-card"><div class="export-card-title">Python Snippet</div><div class="export-card-desc">Ready-to-run asyncio snippet for consuming the WebSocket stream programmatically.</div><button class="export-card-btn" onclick="copyPySnippet()">&#x2398; Copy Snippet</button></div>
       </div>
     </div>
-  </div>
-</div>
+    <!-- Classifier -->
+    <div class="classifier-panel" id="tab-classifier">
+      <div class="cls-top">
+        <div class="cls-status">
+          <div class="cls-pred-label">Live Prediction</div>
+          <div class="cls-pred-name" id="clsPredName">—</div>
+          <div class="cls-pred-conf" id="clsPredConf">Train the model first</div>
+          <div class="cls-conf-bar"><div class="cls-conf-fill" id="clsConfFill" style="width:0%"></div></div>
+          <div class="cls-info" id="clsInfo">Capture labels in the Labels tab, then click Train.</div>
+        </div>
+        <div class="cls-controls">
+          <button class="btn-sm primary" onclick="clsTrain()">&#x21bb; Train k-NN</button>
+          <button class="btn-sm" onclick="clsClear()">Reset Model</button>
+          <div class="cls-k-row">k = <input type="number" id="clsK" value="3" min="1" max="15"/> neighbors</div>
+          <div style="font-size:8.5px;color:var(--text3);line-height:1.5">Uses labeled snapshots<br>from the Labels tab.</div>
+        </div>
+      </div>
+      <div class="cls-candidates" id="clsCandidates">
+        <div style="font-size:9.5px;color:var(--text3)">No model trained yet.</div>
+      </div>
+    </div>
+    <!-- Sequencer -->
+    <div class="sequencer-panel" id="tab-sequencer">
+      <div class="seq-toolbar">
+        <button class="btn-sm primary" id="seqPlayBtn" onclick="seqPlay()">&#x25b6; Play</button>
+        <button class="btn-sm" id="seqStopBtn" onclick="seqStop()" disabled>&#x25a0; Stop</button>
+        <button class="btn-sm" onclick="seqClear()">Clear</button>
+        <label style="font-size:9.5px;color:var(--text2);display:flex;align-items:center;gap:5px;cursor:pointer">
+          <input type="checkbox" id="seqLoop" style="accent-color:var(--accent)"> Loop
+        </label>
+        <span class="rec-info" style="margin-left:auto">Steps: <b id="seqCount">0</b></span>
+      </div>
+      <div class="seq-add-row">
+        <span style="font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase">Add step</span>
+        <select class="seq-select" id="seqPoseSelect">
+          <option value="open">Open</option><option value="fist">Fist</option>
+          <option value="point">Point</option><option value="peace">Peace</option>
+          <option value="pinch">Pinch</option><option value="ok">OK</option>
+          <option value="gun">Gun</option><option value="claw">Claw</option>
+          <option value="relax">Relax</option><option value="rock">Rock</option>
+          <option value="three">Three</option>
+        </select>
+        <input type="number" class="seq-dur-input" id="seqDurInput" value="800" min="100" max="10000" step="100"/>
+        <span style="font-size:9px;color:var(--text3)">ms</span>
+        <button class="btn-sm primary" onclick="seqAddStep()">+ Add</button>
+        <button class="btn-sm" onclick="seqAddAll()">+ All poses</button>
+      </div>
+      <div class="seq-timeline" id="seqTimeline">
+        <div style="font-size:9.5px;color:var(--text3)">No steps yet. Add poses above.</div>
+      </div>
+      <div class="seq-playbar"><div class="seq-playbar-fill" id="seqPlaybarFill"></div></div>
+    </div>
 
-<div id="hand-tooltip"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
 <script>
@@ -1224,6 +1326,201 @@ window.addEventListener("resize",drawChart);
   });
   window.addEventListener("mouseup",()=>{if(drag){drag.handle.classList.remove("dragging");drag=null;}});
 })();
-</script>
+
+// ─────────────────────────────────────────────────────────────
+// GESTURE CLASSIFIER  (k-NN, in-browser, 6-dim motor positions)
+// ─────────────────────────────────────────────────────────────
+let knnModel = null; // {samples:[{label,vec}], classes:[...], k:int}
+
+function clsTrain() {
+  if (!labelsList.length) { alert("No labels captured yet. Use the Labels tab first."); return; }
+  const k = Math.max(1, parseInt(document.getElementById("clsK").value) || 3);
+  const samples = labelsList.map(l => ({
+    label: l.label,
+    vec: l.positions.map(v => v / 1000) // normalise 0-1
+  }));
+  const classes = [...new Set(samples.map(s => s.label))].sort();
+  knnModel = { samples, classes, k };
+  const badge = document.getElementById("clsBadge");
+  badge.textContent = classes.length;
+  document.getElementById("clsInfo").textContent =
+    `Model trained: ${samples.length} samples · ${classes.length} classes · k=${k}`;
+  document.getElementById("clsPredConf").textContent = "Waiting for frame…";
+  renderClsCandidates(classes.map(c => ({ name: c, pct: 0 })));
+}
+
+function clsClear() {
+  knnModel = null;
+  document.getElementById("clsBadge").textContent = "0";
+  document.getElementById("clsPredName").textContent = "—";
+  document.getElementById("clsPredConf").textContent = "Train the model first";
+  document.getElementById("clsConfFill").style.width = "0%";
+  document.getElementById("clsInfo").textContent = "Capture labels in the Labels tab, then click Train.";
+  document.getElementById("clsCandidates").innerHTML =
+    '<div style="font-size:9.5px;color:var(--text3)">No model trained yet.</div>';
+}
+
+function clsPredict(positions) {
+  if (!knnModel) return;
+  const vec = positions.map(v => v / 1000);
+  const dists = knnModel.samples.map(s => {
+    const d = Math.sqrt(s.vec.reduce((acc, v, i) => acc + (v - vec[i]) ** 2, 0));
+    return { label: s.label, d };
+  });
+  dists.sort((a, b) => a.d - b.d);
+  const neighbors = dists.slice(0, knnModel.k);
+  // vote
+  const votes = {};
+  knnModel.classes.forEach(c => votes[c] = 0);
+  neighbors.forEach(n => votes[n.label] = (votes[n.label] || 0) + 1);
+  const sorted = Object.entries(votes).sort((a, b) => b[1] - a[1]);
+  const total = knnModel.k;
+  const top = sorted[0];
+  const conf = top[1] / total;
+
+  document.getElementById("clsPredName").textContent = top[0];
+  document.getElementById("clsPredConf").textContent =
+    `${Math.round(conf * 100)}% confidence  (${top[1]}/${total} votes)`;
+  document.getElementById("clsConfFill").style.width = (conf * 100) + "%";
+
+  const candidates = sorted.map(([name, votes]) => ({ name, pct: votes / total }));
+  renderClsCandidates(candidates);
+}
+
+function renderClsCandidates(candidates) {
+  const el = document.getElementById("clsCandidates");
+  if (!candidates.length) { el.innerHTML = '<div style="font-size:9.5px;color:var(--text3)">—</div>'; return; }
+  el.innerHTML = candidates.map((c, i) => `
+    <div class="cls-cand${i === 0 ? " top1" : ""}">
+      <span class="cls-cand-name">${c.name}</span>
+      <div class="cls-cand-bar-wrap"><div class="cls-cand-bar" style="width:${Math.round(c.pct * 100)}%"></div></div>
+      <span class="cls-cand-pct">${Math.round(c.pct * 100)}%</span>
+    </div>`).join("");
+}
+
+// Hook classifier into WS message handler — call clsPredict when active
+const _clsOrigMsg = window._wsOnMessage;  // nothing to alias; hook via patchWS below
+
+// ─────────────────────────────────────────────────────────────
+// POSE SEQUENCER
+// ─────────────────────────────────────────────────────────────
+let seqSteps = [];      // [{id,pose,dur}]
+let seqNextId = 1;
+let seqRunning = false;
+let seqAbort = false;
+
+function seqAddStep(poseOverride, durOverride) {
+  const pose = poseOverride || document.getElementById("seqPoseSelect").value;
+  const dur  = parseInt(durOverride || document.getElementById("seqDurInput").value) || 800;
+  seqSteps.push({ id: seqNextId++, pose, dur });
+  renderSeqTimeline();
+}
+
+function seqAddAll() {
+  const poses = ["open","fist","point","peace","pinch","ok","gun","claw","relax","rock","three"];
+  const dur   = parseInt(document.getElementById("seqDurInput").value) || 800;
+  poses.forEach(p => seqSteps.push({ id: seqNextId++, pose: p, dur }));
+  renderSeqTimeline();
+}
+
+function seqDeleteStep(id) {
+  seqSteps = seqSteps.filter(s => s.id !== id);
+  renderSeqTimeline();
+}
+
+function seqClear() {
+  if (seqRunning) seqStop();
+  seqSteps = [];
+  renderSeqTimeline();
+}
+
+function renderSeqTimeline(activeId) {
+  document.getElementById("seqCount").textContent = seqSteps.length;
+  const el = document.getElementById("seqTimeline");
+  if (!seqSteps.length) {
+    el.innerHTML = '<div style="font-size:9.5px;color:var(--text3)">No steps yet. Add poses above.</div>';
+    return;
+  }
+  el.innerHTML = seqSteps.map((s, i) => `
+    <div class="seq-step${s.id === activeId ? " active-step" : ""}" id="seqstep${s.id}">
+      <span class="seq-step-idx">${i + 1}</span>
+      <span class="seq-step-name">${s.pose}</span>
+      <span class="seq-step-dur">${s.dur}ms</span>
+      <div class="seq-step-bar"><div class="seq-step-prog" id="seqsprog${s.id}"></div></div>
+      ${seqRunning ? "" : `<button class="seq-step-del" onclick="seqDeleteStep(${s.id})">&#x2715;</button>`}
+    </div>`).join("");
+}
+
+async function seqPlay() {
+  if (seqRunning || !seqSteps.length) return;
+  const loop = document.getElementById("seqLoop").checked;
+  seqRunning = true; seqAbort = false;
+  document.getElementById("seqPlayBtn").disabled = true;
+  document.getElementById("seqStopBtn").disabled = false;
+  renderSeqTimeline();
+
+  const totalDur = seqSteps.reduce((a, s) => a + s.dur, 0);
+  let elapsed = 0;
+
+  do {
+    for (const step of seqSteps) {
+      if (seqAbort) break;
+      // highlight step
+      renderSeqTimeline(step.id);
+      const stepEl = document.getElementById("seqstep" + step.id);
+      if (stepEl) stepEl.scrollIntoView({ block: "nearest" });
+
+      // send pose
+      sendPose(step.pose);
+
+      // animate step progress + global bar
+      const start = Date.now();
+      const progEl = document.getElementById("seqsprog" + step.id);
+      while (Date.now() - start < step.dur) {
+        if (seqAbort) break;
+        const frac = (Date.now() - start) / step.dur;
+        if (progEl) progEl.style.width = (frac * 100) + "%";
+        document.getElementById("seqPlaybarFill").style.width =
+          (((elapsed + (Date.now() - start)) / totalDur) * 100) + "%";
+        await new Promise(r => setTimeout(r, 32));
+      }
+      if (progEl) progEl.style.width = "100%";
+      elapsed = (elapsed + step.dur) % totalDur;
+    }
+  } while (loop && !seqAbort);
+
+  seqStop(true);
+}
+
+function seqStop(internal) {
+  seqAbort = true;
+  seqRunning = false;
+  document.getElementById("seqPlayBtn").disabled = false;
+  document.getElementById("seqStopBtn").disabled = true;
+  document.getElementById("seqPlaybarFill").style.width = "0%";
+  renderSeqTimeline();
+  if (!internal) seqAbort = false;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Patch WS to feed classifier
+// ─────────────────────────────────────────────────────────────
+(function patchWsForClassifier() {
+  // Wait for ws to exist, then wrap its onmessage
+  const interval = setInterval(() => {
+    if (typeof ws !== "undefined" && ws) {
+      const orig = ws.onmessage;
+      ws.onmessage = function(ev) {
+        if (orig) orig.call(ws, ev);
+        try {
+          const d = JSON.parse(ev.data);
+          if (d.positions && knnModel) clsPredict(d.positions);
+        } catch (e) {}
+      };
+      clearInterval(interval);
+    }
+  }, 300);
+})();
+
 </body>
 </html>
