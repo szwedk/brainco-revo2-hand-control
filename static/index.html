@@ -92,38 +92,38 @@ header{
 .sensor-panel,.finger-panel{flex:1;padding:10px 12px;display:flex;flex-direction:column;overflow:hidden;min-height:0}
 .sensor-panel{border-bottom:1px solid var(--border)}
 .fingers-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:6px;flex:1;min-height:0}
-.fc{background:var(--surface2);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:var(--r);padding:9px;display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.fc{background:var(--surface2);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:var(--r);padding:9px;display:flex;flex-direction:column;gap:0;justify-content:space-between;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s}
 .fc.contact{box-shadow:0 0 16px color-mix(in srgb,var(--c) 12%,transparent);border-color:color-mix(in srgb,var(--c) 40%,var(--border))}
 .fc .glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,var(--c) 0%,transparent 65%);opacity:0;transition:opacity .2s}
 .fc.contact .glow{opacity:.06}
-.flabel{font-size:7.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c,var(--text2));display:flex;align-items:center;justify-content:space-between}
+.flabel{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--text2));display:flex;align-items:center;justify-content:space-between}
 .sdot{width:4px;height:4px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);transition:all .3s}
 .sdot.w{background:var(--yellow);box-shadow:0 0 4px var(--yellow)}
 .sdot.e{background:var(--red);box-shadow:0 0 4px var(--red)}
-.arc-svg{width:42px;height:42px;flex-shrink:0}
-.arc-track{fill:none;stroke:var(--surface3);stroke-width:3}
-.arc-fill{fill:none;stroke-width:3;stroke-linecap:round;stroke:var(--c,var(--accent));transition:stroke-dashoffset .1s,stroke .12s}
+.arc-svg{width:min(75%,140px);height:auto;flex-shrink:0}
+.arc-track{fill:none;stroke:var(--surface3);stroke-width:2.5}
+.arc-fill{fill:none;stroke-width:2.5;stroke-linecap:round;stroke:var(--c,var(--accent));transition:stroke-dashoffset .1s,stroke .12s}
 .nfsv-text{font-weight:900;font-family:'Inter',sans-serif}
-.nfv{font-size:15px;font-weight:600;line-height:1;transition:color .12s;font-variant-numeric:tabular-nums;font-family:var(--mono)}
-.tval{font-size:8.5px;color:var(--text2);font-variant-numeric:tabular-nums;font-family:var(--mono)}
-.fc-row{display:flex;align-items:center;gap:5px}
+.nfv{font-size:clamp(28px,4vw,52px);font-weight:600;line-height:1;transition:color .12s;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.tval{font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.fc-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex:1;padding:4px 0}
 .prox-wrap{width:100%}
-.prox-track{width:100%;height:2px;background:var(--surface3);border-radius:2px;overflow:hidden}
+.prox-track{width:100%;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden}
 .prox-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--c,var(--accent)),transparent);transition:width .1s}
-.prox-lbl{display:flex;justify-content:space-between;font-size:7px;color:var(--text3);margin-top:2px}
+.prox-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-top:2px}
 .finger-tiles{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:6px;flex:1;min-height:0}
-.ftile{background:var(--surface2);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:var(--r);padding:9px;display:flex;flex-direction:column;gap:3px;transition:box-shadow .14s,border-color .14s;overflow:hidden;cursor:pointer}
+.ftile{background:var(--surface2);border:1px solid var(--border);border-top:2px solid var(--c);border-radius:var(--r);padding:9px;display:flex;flex-direction:column;justify-content:space-between;transition:box-shadow .14s,border-color .14s;overflow:hidden;cursor:pointer}
 .ftile:hover{box-shadow:0 0 14px color-mix(in srgb,var(--c) 11%,transparent);border-color:color-mix(in srgb,var(--c) 38%,var(--border))}
 .ftile:active{transform:scale(.97)}
 .ftile-top{display:flex;justify-content:space-between;align-items:center}
-.ftile-name{font-size:7.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+.ftile-name{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
 .ftile-dot{width:5px;height:5px;border-radius:50%;background:var(--surface3);transition:all .2s}
 .ftile-dot.active{background:var(--c);box-shadow:0 0 5px var(--c)}
-.ftile-val{font-size:24px;font-weight:600;line-height:1.1;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.03em;font-family:var(--mono)}
+.ftile-val{font-size:clamp(28px,3.5vw,52px);font-weight:600;line-height:1;color:var(--text);font-variant-numeric:tabular-nums;letter-spacing:-.03em;font-family:var(--mono);flex:1;display:flex;align-items:center}
 .ftile-row{display:flex;justify-content:space-between;align-items:center}
-.ftile-pct{font-size:9px;color:var(--text2);font-variant-numeric:tabular-nums;font-family:var(--mono)}
-.ftile-max{font-size:7.5px;color:var(--text3)}
-.ftile-track{width:100%;height:2px;background:var(--surface3);border-radius:2px;overflow:hidden;margin:2px 0}
+.ftile-pct{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.ftile-max{font-size:10px;color:var(--text3)}
+.ftile-track{width:100%;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;margin:3px 0}
 .ftile-fill{height:100%;border-radius:2px;background:var(--c);transition:width .07s;opacity:.65}
 input.ftile-slider{width:100%;cursor:pointer;-webkit-appearance:none;appearance:none;height:3px;border-radius:3px;background:var(--surface3);outline:none;border:none;margin-top:auto}
 input.ftile-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--c);cursor:pointer;box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 16%,transparent)}
@@ -577,6 +577,7 @@ let totalFrames=0;
 const sessionStart=Date.now();
 let chartPaused=false;
 const chartHidden=new Set();
+let sliderLock=0; // global timestamp of last user interaction — blocks WS override
 
 // Dev state
 const MAX_BUFFER=18000;
@@ -602,19 +603,17 @@ FN.forEach((name,i)=>{
         '<circle cx="19" cy="19" r="'+R+'" class="arc-track"/>'+
         '<circle cx="19" cy="19" r="'+R+'" class="arc-fill" id="arc'+i+'"'+
           ' stroke-dasharray="'+circ+'" stroke-dashoffset="'+circ+'" transform="rotate(-90 19 19)"/>'+
-        '<text x="19" y="23" text-anchor="middle" font-size="8" class="nfsv-text"'+
+        '<text x="19" y="22" text-anchor="middle" font-size="7" class="nfsv-text"'+
           ' fill="'+c+'" font-family="Inter,sans-serif" id="nfsv'+i+'">0</text></svg>'+
-      '<div style="display:flex;flex-direction:column;gap:2px;min-width:0">'+
-        '<div class="nfv" id="nfv'+i+'" style="color:'+c+'">0.0</div>'+
-        '<div style="font-size:7.5px;color:var(--text3);font-weight:600">Newtons</div>'+
-        '<div style="display:flex;align-items:center;gap:3px;margin-top:1px">'+
-          '<svg width="16" height="16" viewBox="-12 -12 24 24" style="overflow:visible;flex-shrink:0">'+
-            '<circle r="9" fill="none" stroke="#161720" stroke-width="1"/>'+
-            '<g id="tarr'+i+'"><line x1="0" y1="0" x2="0" y2="-6" stroke="'+c+'" stroke-width="1.6" stroke-linecap="round"/>'+
-            '<polygon points="0,-9 1.4,-5.5 -1.4,-5.5" fill="'+c+'"/></g>'+
-            '<circle r="1.2" fill="'+c+'" opacity=".4"/></svg>'+
-          '<div class="tval" id="tv'+i+'">0.0 N</div>'+
-        '</div>'+
+      '<div class="nfv" id="nfv'+i+'" style="color:'+c+'">0.0</div>'+
+      '<div style="font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.08em;text-transform:uppercase">Newtons</div>'+
+      '<div style="display:flex;align-items:center;gap:5px">'+
+        '<svg width="18" height="18" viewBox="-12 -12 24 24" style="overflow:visible;flex-shrink:0">'+
+          '<circle r="9" fill="none" stroke="#161720" stroke-width="1"/>'+
+          '<g id="tarr'+i+'"><line x1="0" y1="0" x2="0" y2="-6" stroke="'+c+'" stroke-width="1.6" stroke-linecap="round"/>'+
+          '<polygon points="0,-9 1.4,-5.5 -1.4,-5.5" fill="'+c+'"/></g>'+
+          '<circle r="1.2" fill="'+c+'" opacity=".4"/></svg>'+
+        '<div class="tval" id="tv'+i+'">0.0 N tangential</div>'+
       '</div>'+
     '</div>'+
     '<div class="prox-wrap"><div class="prox-lbl"><span>Proximity</span><span id="pv'+i+'">0</span></div>'+
@@ -644,7 +643,7 @@ function setTileVal(i,v){
   const dot=document.getElementById("ftd"+i);
   if(dot)dot.classList.toggle("active",v>0);
 }
-function onSlider(i,v){sliderVals[i]=v;setTileVal(i,v);sendPositions();updateHandViz(sliderVals);}
+function onSlider(i,v){sliderLock=Date.now();sliderVals[i]=v;setTileVal(i,v);sendPositions();updateHandViz(sliderVals);}
 
 // chart legend
 const cleg=document.getElementById("cleg");
@@ -744,12 +743,14 @@ FDEFS.forEach((fd,fi)=>{
   g.addEventListener("mouseleave",()=>{tooltip.style.display="none";});
   g.addEventListener("click",e=>{
     if(dragMoved){dragMoved=false;return;}
+    sliderLock=Date.now();
     const v=sliderVals[fd.si]>500?0:1000;
     sliderVals[fd.si]=v;document.getElementById("sl"+fd.si).value=v;
     setTileVal(fd.si,v);sendPositions();updateHandViz(sliderVals);
   });
   g.addEventListener("wheel",e=>{
     e.preventDefault();
+    sliderLock=Date.now();
     const v=Math.max(0,Math.min(1000,sliderVals[fd.si]+(e.deltaY>0?-50:50)));
     sliderVals[fd.si]=Math.round(v);document.getElementById("sl"+fd.si).value=v;
     setTileVal(fd.si,v);sendPositions();updateHandViz(sliderVals);
@@ -762,6 +763,7 @@ window.addEventListener("mousemove",e=>{
   const delta=e.clientY-dragState.startY;
   if(Math.abs(delta)>3)dragMoved=true;
   const v=Math.max(0,Math.min(1000,dragState.startVal+delta*4));
+  sliderLock=Date.now();
   sliderVals[dragState.si]=Math.round(v);document.getElementById("sl"+dragState.si).value=v;
   setTileVal(dragState.si,v);updateHandViz(sliderVals);sendPositions();
   tooltip.textContent=FDEFS[dragState.fi].name+" · "+Math.round(v);
@@ -1024,7 +1026,7 @@ function connect(){
     if(d.device_info&&!devinfo.textContent.trim())devinfo.textContent=d.device_info;
     if(!d.connected)return;
     totalFrames++;
-    if(d.positions&&!dragState&&!mirrorActive){
+    if(d.positions&&!dragState&&!mirrorActive&&Date.now()-sliderLock>1500){
       d.positions.forEach((p,i)=>{
         const sl=document.getElementById("sl"+i);
         if(sl&&document.activeElement!==sl){sl.value=p;sliderVals[i]=p;setTileVal(i,p);}
