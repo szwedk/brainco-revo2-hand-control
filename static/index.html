@@ -288,27 +288,56 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:var(
 .drawer-handle:hover,.drawer-handle.dragging{background:var(--accent)}
 
 /* ── Gesture Classifier ── */
-.classifier-panel{position:absolute;inset:0;padding:14px;display:none;gap:12px;flex-direction:column;overflow:auto}
+.classifier-panel{position:absolute;inset:0;padding:14px;display:none;gap:12px;flex-direction:column;overflow:hidden}
 .classifier-panel.active{display:flex}
 .cls-top{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;flex-shrink:0}
-.cls-status{flex:1;min-width:160px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:6px}
-.cls-pred-label{font-size:10px;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
-.cls-pred-name{font-size:30px;font-weight:700;font-family:var(--mono);color:var(--accent);line-height:1;letter-spacing:-.02em;transition:color .2s}
-.cls-pred-conf{font-size:10px;color:var(--text2);font-family:var(--mono);margin-top:2px}
-.cls-conf-bar{height:4px;background:var(--surface3);border-radius:4px;overflow:hidden;margin-top:4px}
-.cls-conf-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .15s}
-.cls-info{font-size:9px;color:var(--text3);margin-top:4px;line-height:1.5}
-.cls-controls{display:flex;flex-direction:column;gap:7px;flex-shrink:0}
-.cls-k-row{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--text2)}
-.cls-k-row input{width:50px;background:var(--surface2);border:1px solid var(--border-hi);border-radius:4px;color:var(--text);padding:2px 6px;font-family:var(--mono);font-size:10px;outline:none;text-align:center}
+.cls-status{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.cls-pred-label{font-size:11px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;font-weight:700}
+.cls-pred-name{font-size:56px;font-weight:800;font-family:var(--mono);color:var(--accent);line-height:1;letter-spacing:-.03em;transition:color .2s}
+.cls-pred-conf{font-size:14px;color:var(--text2);font-family:var(--mono);margin-top:4px}
+.cls-conf-bar{height:6px;background:var(--surface3);border-radius:6px;overflow:hidden;margin-top:6px}
+.cls-conf-fill{height:100%;border-radius:6px;background:var(--accent);transition:width .15s}
+.cls-info{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.6}
+.cls-body{display:flex;gap:14px;flex:1;min-height:0;overflow:hidden}
+.cls-controls{display:flex;flex-direction:column;gap:8px;flex-shrink:0;min-width:160px}
+.cls-k-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text2)}
+.cls-k-row input{width:56px;background:var(--surface2);border:1px solid var(--border-hi);border-radius:4px;color:var(--text);padding:3px 8px;font-family:var(--mono);font-size:11px;outline:none;text-align:center}
 .cls-k-row input:focus{border-color:var(--border-focus)}
-.cls-candidates{display:flex;flex-direction:column;gap:4px;flex:1;overflow:auto;min-height:0}
-.cls-cand{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);transition:border-color .12s}
+.cls-candidates{display:flex;flex-direction:column;gap:5px;flex:1;overflow:auto;min-height:0}
+.cls-cand{display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);transition:border-color .12s}
 .cls-cand.top1{border-color:rgba(124,110,255,.4);background:var(--accent-dim)}
-.cls-cand-name{font-family:var(--mono);font-size:10.5px;font-weight:600;color:var(--text);min-width:90px}
-.cls-cand-bar-wrap{flex:1;height:4px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.cls-cand-name{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text);min-width:110px}
+.cls-cand-bar-wrap{flex:1;height:6px;background:var(--surface3);border-radius:4px;overflow:hidden}
 .cls-cand-bar{height:100%;border-radius:4px;background:var(--accent);transition:width .15s}
-.cls-cand-pct{font-size:9px;font-family:var(--mono);color:var(--text2);min-width:34px;text-align:right}
+.cls-cand-pct{font-size:12px;font-family:var(--mono);color:var(--text2);min-width:40px;text-align:right}
+/* ── Help / Tutorial ── */
+.help-panel{position:absolute;inset:0;padding:0;display:none;flex-direction:column;overflow:hidden}
+.help-panel.active{display:flex}
+.help-nav{display:flex;align-items:center;gap:2px;padding:8px 14px;background:rgba(6,6,9,.7);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.help-nav::-webkit-scrollbar{display:none}
+.help-nav-btn{padding:3px 11px;border-radius:4px;font-size:9.5px;font-weight:600;background:transparent;border:1px solid transparent;color:var(--text3);cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+.help-nav-btn:hover{color:var(--text2)}
+.help-nav-btn.active{background:var(--accent-dim);border-color:rgba(124,110,255,.28);color:var(--accent)}
+.help-body{flex:1;overflow-y:auto;padding:20px 28px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.help-section{display:none}
+.help-section.active{display:block}
+.help-h1{font-size:22px;font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:6px}
+.help-h2{font-size:14px;font-weight:700;color:var(--accent);letter-spacing:.04em;text-transform:uppercase;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.help-p{font-size:12px;color:var(--text2);line-height:1.8;margin-bottom:10px}
+.help-sub{font-size:11px;color:var(--text2);line-height:1.7;margin-bottom:8px;padding-left:12px;border-left:2px solid var(--border-hi)}
+.help-step{display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
+.help-step-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.help-step-text{font-size:12px;color:var(--text2);line-height:1.7}
+.help-step-text b{color:var(--text)}
+.help-kbd{display:inline-block;background:var(--surface3);border:1px solid var(--border-hi);border-radius:4px;padding:1px 6px;font-family:var(--mono);font-size:10px;color:var(--text);margin:0 2px}
+.help-tip{display:flex;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:var(--r-sm);margin:10px 0}
+.help-tip-icon{font-size:14px;flex-shrink:0}
+.help-tip-text{font-size:11px;color:var(--text2);line-height:1.7}
+.help-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:9.5px;font-weight:700;font-family:var(--mono);background:var(--accent-dim);color:var(--accent);border:1px solid rgba(124,110,255,.25);margin:0 2px}
+.help-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-bottom:12px}
+.help-card{padding:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)}
+.help-card-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px}
+.help-card-desc{font-size:10.5px;color:var(--text2);line-height:1.6}
 
 /* ── Pose Sequencer ── */
 .sequencer-panel{position:absolute;inset:0;padding:14px;display:none;gap:10px;flex-direction:column;overflow:hidden}
@@ -333,6 +362,69 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:var(
 .seq-step-del:hover{color:var(--red)}
 .seq-playbar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
 .seq-playbar-fill{height:100%;background:var(--accent);width:0%;transition:width .1s linear}
+
+/* ── Force Alerts ── */
+.alerts-panel{position:absolute;inset:0;padding:14px;display:none;gap:12px;flex-direction:column;overflow:auto}
+.alerts-panel.active{display:flex}
+.alert-row{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)}
+.alert-finger{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;min-width:56px}
+.alert-thresh-wrap{display:flex;align-items:center;gap:6px;flex:1}
+.alert-thresh-wrap input[type=range]{flex:1;-webkit-appearance:none;appearance:none;height:3px;border-radius:3px;background:var(--surface3);outline:none;cursor:pointer}
+.alert-thresh-wrap input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;cursor:pointer}
+.alert-thresh-val{font-family:var(--mono);font-size:10px;color:var(--text2);min-width:48px;text-align:right}
+.alert-active{width:8px;height:8px;border-radius:50%;background:var(--surface3);flex-shrink:0;transition:all .2s}
+.alert-active.firing{background:var(--red);box-shadow:0 0 8px var(--red);animation:breathe .4s ease-in-out infinite}
+.alert-toggle{cursor:pointer;color:var(--text3);font-size:11px;padding:2px 6px;border-radius:4px;background:none;border:1px solid var(--border-hi);font-family:inherit;transition:all .12s}
+.alert-toggle.on{border-color:rgba(240,62,90,.4);color:var(--red)}
+.alert-global{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.alert-sound-label{font-size:9px;color:var(--text2);display:flex;align-items:center;gap:5px;cursor:pointer}
+
+/* ── Motion Recorder ── */
+.motion-panel{position:absolute;inset:0;padding:14px;display:none;gap:12px;flex-direction:column;overflow:auto}
+.motion-panel.active{display:flex}
+.motion-controls{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.motion-speed-row{display:flex;align-items:center;gap:7px;font-size:9.5px;color:var(--text2);flex-shrink:0}
+.motion-speed-row input[type=range]{width:90px;-webkit-appearance:none;appearance:none;height:3px;border-radius:3px;background:var(--surface3);outline:none;cursor:pointer}
+.motion-speed-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--accent);cursor:pointer}
+.motion-list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:5px;min-height:0}
+.motion-item{display:flex;align-items:center;gap:8px;padding:7px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);transition:all .12s}
+.motion-item:hover{border-color:var(--border-hi)}
+.motion-item.playing{border-color:var(--green);background:var(--green-dim)}
+.motion-item-name{font-family:var(--mono);font-size:10.5px;color:var(--text);flex:1}
+.motion-item-meta{font-size:8.5px;color:var(--text3)}
+.motion-item-bar{height:2px;background:var(--border);border-radius:2px;overflow:hidden;width:60px;flex-shrink:0}
+.motion-item-prog{height:100%;background:var(--green);width:0%;transition:width .05s linear}
+
+/* ── PCA Scatter ── */
+.pca-panel{position:absolute;inset:0;padding:14px;display:none;gap:10px;flex-direction:column;overflow:hidden}
+.pca-panel.active{display:flex}
+.pca-wrap{flex:1;position:relative;min-height:0}
+canvas#pcaCanvas{position:absolute;inset:0;width:100%;height:100%;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border)}
+.pca-legend{display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0}
+.pca-leg-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text2);font-family:var(--mono)}
+.pca-leg-dot{width:8px;height:8px;border-radius:50%}
+
+/* ── Radar Chart ── */
+.radar-wrap{flex:1;position:relative;min-height:0;margin-top:6px}
+canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
+
+/* ── Tween interpolation row in sequencer ── */
+.seq-tween-row{display:flex;align-items:center;gap:8px;font-size:9.5px;color:var(--text2);flex-shrink:0}
+.seq-tween-row input[type=range]{width:80px;-webkit-appearance:none;appearance:none;height:3px;border-radius:3px;background:var(--surface3);outline:none;cursor:pointer}
+.seq-tween-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;border-radius:50%;background:var(--accent);cursor:pointer}
+
+/* ── Heatmap fingertips ── */
+.heatmap-overlay{position:absolute;inset:0;pointer-events:none}
+
+/* ── MIDI / KB mapping panel ── */
+.mapping-panel{position:absolute;inset:0;padding:14px;display:none;gap:12px;flex-direction:column;overflow:auto}
+.mapping-panel.active{display:flex}
+.map-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm)}
+.map-key{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);min-width:36px}
+.map-action{font-size:10px;color:var(--text);flex:1}
+.map-edit-btn{padding:2px 8px;border-radius:4px;font-size:8.5px;background:var(--surface3);border:1px solid var(--border-hi);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .12s}
+.map-edit-btn:hover{border-color:var(--border-focus);color:var(--text)}
+.map-edit-btn.listening{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 </style>
 </head>
 <body>
@@ -373,7 +465,7 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:var(
 <div class="workspace" id="workspace">
 
   <!-- LEFT -->
-  <div class="left-col" id="lcol" style="width:256px">
+  <div class="left-col" id="lcol" style="width:380px">
     <div class="sensor-panel">
       <div class="sec-hd">
         <div class="sec-dot"></div>
@@ -405,6 +497,7 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:var(
     </div>
     <div class="hand-area">
       <svg id="hand-svg" viewBox="-18 0 218 320" xmlns="http://www.w3.org/2000/svg"></svg>
+      <canvas id="heatmapCanvas" class="heatmap-overlay" style="border-radius:var(--r)"></canvas>
       <div class="mirror-pip" id="mirrorPip">
         <video id="pipVideo" autoplay muted playsinline></video>
         <canvas id="pipCanvas"></canvas>
@@ -417,7 +510,7 @@ canvas#chart{position:absolute;inset:0;width:100%;height:100%;border-radius:var(
 
   <!-- RIGHT -->
   <div class="right-col" id="rcol" style="flex:1;min-width:200px">
-    <div class="right-top" style="flex:1;min-height:0">
+    <div class="right-top" style="flex:4;min-height:0">
       <div class="poses-section">
         <div class="sec-hd" style="margin-bottom:7px">
           <div class="sec-dot"></div>
@@ -488,11 +581,13 @@ run();</textarea>
         <span class="sec-title">Force History</span>
         <div class="sec-actions" style="margin-left:auto;gap:8px">
           <div class="cleg" id="cleg"></div>
+          <button class="chart-pause-btn" id="chartModeBtn" onclick="toggleChartMode()" style="margin-right:3px">Radar</button>
           <button class="chart-pause-btn" id="chartPauseBtn" onclick="toggleChartPause()">Pause</button>
         </div>
       </div>
       <div class="chart-wrap">
         <canvas id="chart"></canvas>
+        <canvas id="radarChart" style="position:absolute;inset:0;width:100%;height:100%;display:none"></canvas>
       </div>
     </div>
   </div>
@@ -523,6 +618,21 @@ run();</textarea>
     </div>
     <div class="dev-tab" data-tab="sequencer" onclick="switchTab('sequencer')">
       Sequencer
+    </div>
+    <div class="dev-tab" data-tab="motion" onclick="switchTab('motion')">
+      Motion Rec <span class="dev-tab-badge" id="motionBadge">0</span>
+    </div>
+    <div class="dev-tab" data-tab="alerts" onclick="switchTab('alerts')">
+      Alerts
+    </div>
+    <div class="dev-tab" data-tab="pca" onclick="switchTab('pca')">
+      PCA
+    </div>
+    <div class="dev-tab" data-tab="mapping" onclick="switchTab('mapping')">
+      Key Map
+    </div>
+    <div class="dev-tab" data-tab="help" onclick="switchTab('help')">
+      &#x2753; Help
     </div>
     <div class="dev-tab-actions">
       <button class="dev-mini-btn" id="drawerToggleBtn" onclick="toggleDrawer()">&#9660; Collapse</button>
@@ -588,23 +698,23 @@ run();</textarea>
     </div>
     <!-- Classifier -->
     <div class="classifier-panel" id="tab-classifier">
-      <div class="cls-top">
-        <div class="cls-status">
-          <div class="cls-pred-label">Live Prediction</div>
-          <div class="cls-pred-name" id="clsPredName">&mdash;</div>
-          <div class="cls-pred-conf" id="clsPredConf">Train the model first</div>
-          <div class="cls-conf-bar"><div class="cls-conf-fill" id="clsConfFill" style="width:0%"></div></div>
-          <div class="cls-info" id="clsInfo">Capture labels in the Labels tab, then click Train.</div>
-        </div>
+      <div class="cls-status">
+        <div class="cls-pred-label">Live Prediction</div>
+        <div class="cls-pred-name" id="clsPredName">&mdash;</div>
+        <div class="cls-pred-conf" id="clsPredConf">Train the model first</div>
+        <div class="cls-conf-bar"><div class="cls-conf-fill" id="clsConfFill" style="width:0%"></div></div>
+        <div class="cls-info" id="clsInfo">Capture labels in the Labels tab, then click Train.</div>
+      </div>
+      <div class="cls-body">
         <div class="cls-controls">
           <button class="btn-sm primary" onclick="clsTrain()">&#x21bb; Train k-NN</button>
           <button class="btn-sm" onclick="clsClear()">Reset Model</button>
           <div class="cls-k-row">k = <input type="number" id="clsK" value="3" min="1" max="15"/> neighbors</div>
-          <div style="font-size:8.5px;color:var(--text3);line-height:1.5">Uses labeled snapshots<br>from the Labels tab.</div>
+          <div style="font-size:10.5px;color:var(--text3);line-height:1.6">Uses labeled snapshots<br>from the Labels tab.</div>
         </div>
-      </div>
-      <div class="cls-candidates" id="clsCandidates">
-        <div style="font-size:9.5px;color:var(--text3)">No model trained yet.</div>
+        <div class="cls-candidates" id="clsCandidates">
+          <div style="font-size:11px;color:var(--text3)">No model trained yet.</div>
+        </div>
       </div>
     </div>
     <!-- Sequencer -->
@@ -633,10 +743,264 @@ run();</textarea>
         <button class="btn-sm primary" onclick="seqAddStep()">+ Add</button>
         <button class="btn-sm" onclick="seqAddAll()">+ All poses</button>
       </div>
+      <div class="seq-tween-row">
+        <span>Tween speed</span>
+        <input type="range" id="seqTweenSpeed" min="1" max="10" value="5" oninput="document.getElementById('seqTweenVal').textContent=this.value"/>
+        <span id="seqTweenVal">5</span>
+        <span style="color:var(--text3)">(steps/frame interp)</span>
+      </div>
       <div class="seq-timeline" id="seqTimeline">
         <div style="font-size:9.5px;color:var(--text3)">No steps yet. Add poses above.</div>
       </div>
       <div class="seq-playbar"><div class="seq-playbar-fill" id="seqPlaybarFill"></div></div>
+    </div>
+
+    <!-- Motion Recorder -->
+    <div class="motion-panel" id="tab-motion">
+      <div class="motion-controls">
+        <button class="btn-sm primary" id="motRecBtn" onclick="motStartRec()">&#9679; Record Motion</button>
+        <button class="btn-sm" id="motStopBtn" onclick="motStopRec()" disabled>&#9632; Stop</button>
+        <span class="rec-info">Frames: <b id="motFrameCount">0</b></span>
+        <span class="rec-info">Duration: <b id="motDur">0.0s</b></span>
+      </div>
+      <div class="motion-speed-row">
+        <span>Playback speed</span>
+        <input type="range" id="motSpeed" min="0.1" max="3" step="0.1" value="1" oninput="document.getElementById('motSpeedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
+        <span id="motSpeedVal">1.0x</span>
+      </div>
+      <div class="motion-list" id="motionList">
+        <div style="font-size:9.5px;color:var(--text3)">No motions recorded yet. Click Record Motion to begin.</div>
+      </div>
+    </div>
+
+    <!-- Force Alerts -->
+    <div class="alerts-panel" id="tab-alerts">
+      <div class="alert-global">
+        <span style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)">Force Threshold Alerts</span>
+        <label class="alert-sound-label"><input type="checkbox" id="alertSound" style="accent-color:var(--accent)"> Sound</label>
+        <button class="btn-sm" onclick="alertTestSound()">Test Beep</button>
+      </div>
+      <div id="alertRows"></div>
+    </div>
+
+    <!-- PCA -->
+    <div class="pca-panel" id="tab-pca">
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
+        <span class="sec-title">PCA Scatter (labeled samples)</span>
+        <button class="btn-sm primary" onclick="pcaRender()">&#x21bb; Recompute</button>
+        <span style="font-size:9px;color:var(--text3)">Live point updates as data streams in</span>
+      </div>
+      <div class="pca-wrap"><canvas id="pcaCanvas"></canvas></div>
+      <div class="pca-legend" id="pcaLegend"></div>
+    </div>
+
+    <!-- Key / MIDI Mapping -->
+    <div class="mapping-panel" id="tab-mapping">
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
+        <span class="sec-title">Keyboard &amp; MIDI Mapping</span>
+        <button class="btn-sm primary" onclick="mapAddRow()">+ Add</button>
+        <button class="btn-sm" onclick="mapReset()">Reset Defaults</button>
+        <span style="font-size:9px;color:var(--text3)">Click Edit Key, then press a key. MIDI CC auto-detected.</span>
+      </div>
+      <div id="mapRows" style="display:flex;flex-direction:column;gap:4px;flex:1;overflow:auto;min-height:0"></div>
+    </div>
+
+    <!-- Help / Tutorial -->
+    <div class="help-panel" id="tab-help">
+      <div class="help-nav">
+        <button class="help-nav-btn active" data-sec="overview" onclick="helpNav('overview')">Overview</button>
+        <button class="help-nav-btn" data-sec="layout" onclick="helpNav('layout')">UI Layout</button>
+        <button class="help-nav-btn" data-sec="tactile" onclick="helpNav('tactile')">Tactile Sensors</button>
+        <button class="help-nav-btn" data-sec="control" onclick="helpNav('control')">Finger Control</button>
+        <button class="help-nav-btn" data-sec="poses" onclick="helpNav('poses')">Poses &amp; Sequences</button>
+        <button class="help-nav-btn" data-sec="code" onclick="helpNav('code')">Custom Code</button>
+        <button class="help-nav-btn" data-sec="mirror" onclick="helpNav('mirror')">Mirror Mode</button>
+        <button class="help-nav-btn" data-sec="recording" onclick="helpNav('recording')">Recording &amp; Labels</button>
+        <button class="help-nav-btn" data-sec="classifier" onclick="helpNav('classifier')">Classifier (k-NN)</button>
+        <button class="help-nav-btn" data-sec="motion" onclick="helpNav('motion')">Motion Replay</button>
+        <button class="help-nav-btn" data-sec="alerts" onclick="helpNav('alerts')">Alerts</button>
+        <button class="help-nav-btn" data-sec="export" onclick="helpNav('export')">Export &amp; API</button>
+        <button class="help-nav-btn" data-sec="shortcuts" onclick="helpNav('shortcuts')">Shortcuts</button>
+      </div>
+      <div class="help-body">
+
+        <div class="help-section active" id="hsec-overview">
+          <div class="help-h1">Revo2Touch Dev Console</div>
+          <p class="help-p">A real-time control and data platform for the <b style="color:var(--text)">BrainCo Revo2Touch</b> prosthetic hand. It streams motor positions, tactile force data, and proximity readings over WebSocket at ~25 Hz and lets you control, record, classify, and replay hand gestures — all in-browser.</p>
+          <div class="help-tip"><span class="help-tip-icon">&#x26a1;</span><span class="help-tip-text">The server runs locally at <code style="font-family:var(--mono);color:var(--cyan)">http://localhost:8765</code>. Start it with <code style="font-family:var(--mono);color:var(--cyan)">python server.py</code> from the <code style="font-family:var(--mono)">brainco/</code> folder. The UI auto-reconnects if the connection drops.</span></div>
+          <div class="help-h2">Feature Overview</div>
+          <div class="help-grid">
+            <div class="help-card"><div class="help-card-title">&#x1f91a; Tactile Sensors</div><div class="help-card-desc">Per-finger normal force, tangential force, direction vector, and proximity with live arc gauges.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f3ae; Finger Control</div><div class="help-card-desc">6 independent sliders (Thumb, ThAux, Index, Middle, Ring, Pinky) 0–1000. Drag, scroll, or click the SVG hand.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f590;&#xfe0f; Pose Library</div><div class="help-card-desc">12 built-in poses. One-click or keyboard shortcut. Run Demo cycles all poses automatically.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f4f9; Mirror Mode</div><div class="help-card-desc">MediaPipe hand tracking mirrors your webcam hand posture onto the robot in real time.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f9e0; k-NN Classifier</div><div class="help-card-desc">Train an in-browser k-nearest-neighbors model on labeled snapshots. Live prediction at full stream rate.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x23f1;&#xfe0f; Motion Replay</div><div class="help-card-desc">Record continuous hand motion frame-by-frame. Replay at adjustable speed.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f514; Force Alerts</div><div class="help-card-desc">Per-finger threshold alerts with visual indicator and optional audio beep.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f4ca; PCA Scatter</div><div class="help-card-desc">2D PCA projection of labeled gesture samples for visual class separability analysis.</div></div>
+            <div class="help-card"><div class="help-card-title">&#x2b07;&#xfe0f; Export</div><div class="help-card-desc">Buffer, sessions, and labels exportable as JSON or CSV. WebSocket URL for external Python/Node clients.</div></div>
+          </div>
+        </div>
+
+        <div class="help-section" id="hsec-layout">
+          <div class="help-h1">UI Layout</div>
+          <p class="help-p">The interface is split into three resizable columns and a collapsible bottom drawer. All dividers can be dragged.</p>
+          <div class="help-h2">Columns</div>
+          <div class="help-step"><div class="help-step-num">L</div><div class="help-step-text"><b>Left column</b> — Tactile Sensors (top) and Finger Control sliders (bottom). Default width 380 px, draggable up to 700 px.</div></div>
+          <div class="help-step"><div class="help-step-num">C</div><div class="help-step-text"><b>Center column</b> — 3D SVG hand visualization. Fingers are interactive: click to toggle, scroll to set value, drag up/down to scrub. Heatmap blobs show live force per fingertip.</div></div>
+          <div class="help-step"><div class="help-step-num">R</div><div class="help-step-text"><b>Right column</b> — top half holds Poses panel + Custom Code editor side by side; bottom half is the Force History chart (switchable to Radar view).</div></div>
+          <div class="help-h2">Bottom Drawer</div>
+          <p class="help-p">Drag the thin handle above the drawer to resize it. Click <span class="help-tag">Collapse</span> to hide. Tabs: Stream Inspector, Data Logger, Session Recorder, Labels, Export, Classifier, Sequencer, Motion Rec, Alerts, PCA, Key Map, Help.</p>
+          <div class="help-h2">Header Bar</div>
+          <p class="help-p">Shows connection status, device info, live Hz, frame count, and session timer. <span class="help-tag">Record</span> starts a session recording directly. <span class="help-tag">Mirror</span> activates webcam hand tracking.</p>
+        </div>
+
+        <div class="help-section" id="hsec-tactile">
+          <div class="help-h1">Tactile Sensors</div>
+          <p class="help-p">Five force sensors (Thumb through Pinky) stream data at ~25 Hz. Each card shows:</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text"><b>Arc gauge</b> — fill proportion = normal force / 2500 N scale. Color shifts green → yellow → red as force increases.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text"><b>Large number</b> — raw normal force in Newtons.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text"><b>Compass arrow</b> — tangential force direction. Rotates to show shear direction.</div></div>
+          <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text"><b>Proximity bar</b> — capacitive proximity (0–200 range). Useful for pre-contact detection.</div></div>
+          <div class="help-step"><div class="help-step-num">5</div><div class="help-step-text"><b>Status dot</b> — green = OK, yellow = warning, red = error from SDK status byte.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f4a1;</span><span class="help-tip-text">The <b style="color:var(--text)">heatmap overlay</b> on the SVG hand visualizes the same normal force data — fingertips glow green→red in real time. No interaction required.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-control">
+          <div class="help-h1">Finger Control</div>
+          <p class="help-p">Six motor channels: <b style="color:var(--text)">Thumb, ThAux, Index, Middle, Ring, Pinky</b>. Values 0 (open) to 1000 (fully closed).</p>
+          <div class="help-h2">Ways to set a value</div>
+          <div class="help-step"><div class="help-step-num">A</div><div class="help-step-text"><b>Tile slider</b> — drag the thin bar at the bottom of each finger tile.</div></div>
+          <div class="help-step"><div class="help-step-num">B</div><div class="help-step-text"><b>SVG hand drag</b> — click and drag a finger segment up or down. Delta × 4 per pixel.</div></div>
+          <div class="help-step"><div class="help-step-num">C</div><div class="help-step-text"><b>SVG hand scroll</b> — hover a finger and scroll ±50 per notch.</div></div>
+          <div class="help-step"><div class="help-step-num">D</div><div class="help-step-text"><b>SVG hand click</b> — toggles between 0 and 1000 (tap to open/close).</div></div>
+          <div class="help-step"><div class="help-step-num">E</div><div class="help-step-text"><b>Custom Code API</b> — call <code style="font-family:var(--mono);color:var(--cyan)">send([t,ta,i,m,r,p])</code> from the code editor.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x26a0;&#xfe0f;</span><span class="help-tip-text">A 1.5-second <b style="color:var(--text)">slider lock</b> prevents incoming WebSocket data from overriding manual controls. After 1.5 s of inactivity the live stream resumes updating sliders.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-poses">
+          <div class="help-h1">Poses &amp; Sequencer</div>
+          <div class="help-h2">Built-in Poses</div>
+          <p class="help-p">Click any pose button or press the keyboard shortcut. Positions are sent to the hand instantly.</p>
+          <div class="help-grid">
+            <div class="help-card"><div class="help-card-title">&#x1f590;&#xfe0f; Open <span class="help-kbd">O</span></div><div class="help-card-desc">All fingers fully open (0,0,0,0,0,0)</div></div>
+            <div class="help-card"><div class="help-card-title">&#x270a; Fist <span class="help-kbd">F</span></div><div class="help-card-desc">All fingers closed</div></div>
+            <div class="help-card"><div class="help-card-title">&#x261d;&#xfe0f; Point <span class="help-kbd">P</span></div><div class="help-card-desc">Index extended, others closed</div></div>
+            <div class="help-card"><div class="help-card-title">&#x270c;&#xfe0f; Peace <span class="help-kbd">V</span></div><div class="help-card-desc">Index + Middle extended</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f90f; Pinch <span class="help-kbd">N</span></div><div class="help-card-desc">Thumb + Index pinch</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f44c; OK <span class="help-kbd">K</span></div><div class="help-card-desc">Thumb-index ring, others open</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f52b; Gun</div><div class="help-card-desc">Index + Thumb extended</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f9be; Claw</div><div class="help-card-desc">All fingers half-curl</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f4a4; Relax</div><div class="help-card-desc">Natural resting position</div></div>
+            <div class="help-card"><div class="help-card-title">&#x1f918; Rock</div><div class="help-card-desc">Index + Middle closed, others open</div></div>
+            <div class="help-card"><div class="help-card-title">3&#xfe0f;&#x20e3; Three</div><div class="help-card-desc">Index, Middle, Ring extended</div></div>
+          </div>
+          <div class="help-h2">Sequencer (drawer tab)</div>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Select a pose and duration (ms) in the <b>Add step</b> row, then click <b>+ Add</b>. Or use <b>+ All poses</b> to add every pose at once.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Click <b>&#x25b6; Play</b>. Each step highlights as active and shows a progress bar. Enable <b>Loop</b> to repeat forever.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">The <b>Tween speed</b> slider controls how many interpolation steps are applied per animation frame when transitioning between poses.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f3b5;</span><span class="help-tip-text">Run Demo (in the Poses panel) is a quick preset sequence. For custom sequences use the Sequencer tab.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-code">
+          <div class="help-h1">Custom Code</div>
+          <p class="help-p">Write JavaScript that runs directly in the browser and controls the hand via a small async API.</p>
+          <div class="help-h2">API Reference</div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><code style="font-family:var(--mono);color:var(--cyan)">send([t, ta, i, m, r, p])</code> — send 6 motor positions (0–1000) immediately.</div></div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><code style="font-family:var(--mono);color:var(--cyan)">pose('fist')</code> — send a named pose from the built-in library.</div></div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><code style="font-family:var(--mono);color:var(--cyan)">await sleep(ms)</code> — async delay. Must be used inside an <code style="font-family:var(--mono)">async function</code>.</div></div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><code style="font-family:var(--mono);color:var(--cyan)">log('message')</code> — print to the output area below the editor.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f527;</span><span class="help-tip-text">The code runs in <code style="font-family:var(--mono)">'use strict'</code> mode. Any uncaught error is shown in the output area prefixed with <code style="font-family:var(--mono)">ERR:</code>. Click <b>Clear</b> to reset the output.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-mirror">
+          <div class="help-h1">Mirror Mode</div>
+          <p class="help-p">Uses <b style="color:var(--text)">Google MediaPipe Hands</b> to detect your hand from the webcam and mirror the curl of each finger onto the robot in real time.</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Click <b>Mirror</b> in the header. Grant camera permission when prompted.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">A PiP (picture-in-picture) video appears bottom-right of the hand visualization with a skeleton overlay.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">Your finger curls are mapped 0→1000. An exponential moving average (α=0.35) smooths the output.</div></div>
+          <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text">Click <b>Stop Mirror</b> to release the camera. Slider lock is activated while mirror is running.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f4a1;</span><span class="help-tip-text">Best results in good lighting with your palm facing the camera. MediaPipe requires a HTTPS or localhost origin — this app runs on localhost so it works out of the box.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-recording">
+          <div class="help-h1">Recording &amp; Labels</div>
+          <div class="help-h2">Session Recorder</div>
+          <p class="help-p">Captures full-rate frames (positions + force) into a named session that can be downloaded as JSON. Up to 18,000 frames are kept in the live buffer at all times.</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Go to <b>Session Recorder</b> tab (or click the <b>Record</b> button in the header) and click <b>&#9679; Start Recording</b>.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Perform your gestures. Frame count and duration update live.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">Click <b>&#9632; Stop</b>. The session appears in the list. Download or delete it anytime.</div></div>
+          <div class="help-h2">Labels (Snapshots)</div>
+          <p class="help-p">Capture a single-frame snapshot with a text label. Used as training data for the k-NN classifier.</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Go to the <b>Labels</b> tab. Type a label name (e.g. <i>open</i>, <i>grasp_cup</i>).</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Press <span class="help-kbd">Enter</span> or click <b>+ Capture</b>. The current motor positions and force levels are saved.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">Capture 5–10 samples per class for best classifier accuracy. Export as CSV for offline ML training.</div></div>
+        </div>
+
+        <div class="help-section" id="hsec-classifier">
+          <div class="help-h1">Gesture Classifier (k-NN)</div>
+          <p class="help-p">An in-browser <b style="color:var(--text)">k-nearest-neighbors</b> classifier trained on labeled snapshots. It runs at stream rate (~25 Hz) and shows the predicted gesture with confidence.</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Capture labeled samples (at least 2 different labels, 3+ samples each) in the <b>Labels</b> tab.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Open the <b>Classifier</b> tab. Set k (default 3) and click <b>&#x21bb; Train k-NN</b>.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">The large prediction label updates live. The confidence bar and candidate list show vote distribution across classes.</div></div>
+          <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text">Open the <b>PCA</b> tab to see a 2D scatter of your samples — overlapping clusters mean the classes are hard to separate.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f9e0;</span><span class="help-tip-text">Feature vector is the 6 motor positions normalised 0–1. More diverse sample positions per class → better accuracy. k=1 is fastest but overfit; k=5–7 gives smoother predictions.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-motion">
+          <div class="help-h1">Motion Recorder &amp; Replay</div>
+          <p class="help-p">Records a <b style="color:var(--text)">time-series</b> of motor positions (not just a snapshot) and replays them with accurate timing.</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Open the <b>Motion Rec</b> tab. Click <b>&#9679; Record Motion</b>.</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Control the hand however you like — sliders, poses, custom code, mirror mode. Every incoming frame is recorded.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">Click <b>&#9632; Stop</b>. The motion appears in the list.</div></div>
+          <div class="help-step"><div class="help-step-num">4</div><div class="help-step-text">Click <b>&#x25b6;</b> to replay. Adjust <b>Playback speed</b> (0.1× slow-mo to 3× fast). A progress bar tracks replay position.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x23f1;&#xfe0f;</span><span class="help-tip-text">Playback uses wall-clock interpolation — actual frame timing is preserved regardless of browser framerate.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-alerts">
+          <div class="help-h1">Force Threshold Alerts</div>
+          <p class="help-p">Monitor per-finger force and get notified when a threshold is exceeded.</p>
+          <div class="help-step"><div class="help-step-num">1</div><div class="help-step-text">Open the <b>Alerts</b> tab. Each finger has a threshold slider (50–2500 N).</div></div>
+          <div class="help-step"><div class="help-step-num">2</div><div class="help-step-text">Enable/disable individual fingers with the <b>ON/OFF</b> toggle. The red indicator dot pulses when firing.</div></div>
+          <div class="help-step"><div class="help-step-num">3</div><div class="help-step-text">Enable the <b>Sound</b> checkbox for an audio beep (different pitch per finger). Click <b>Test Beep</b> to preview.</div></div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f527;</span><span class="help-tip-text">Useful for grasp calibration — set the threshold to the maximum safe grip force and monitor during object manipulation.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-export">
+          <div class="help-h1">Export &amp; External API</div>
+          <div class="help-h2">Export formats</div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><b>Buffer → JSON/CSV</b> — last 18,000 frames with timestamps, positions, and force values.</div></div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><b>Labels → CSV</b> — snapshot dataset ready for pandas / scikit-learn.</div></div>
+          <div class="help-step"><div class="help-step-num">→</div><div class="help-step-text"><b>Sessions → JSON</b> — all recorded sessions merged.</div></div>
+          <div class="help-h2">WebSocket API</div>
+          <p class="help-p">Connect directly to <code style="font-family:var(--mono);color:var(--cyan)">ws://localhost:8765/ws</code> from any client.</p>
+          <p class="help-sub">Incoming frames: <code style="font-family:var(--mono)">{ connected, positions[6], touch[5], ts, device_info }</code></p>
+          <p class="help-sub">Send pose: <code style="font-family:var(--mono)">{ type: "pose", name: "fist" }</code></p>
+          <p class="help-sub">Send positions: <code style="font-family:var(--mono)">{ type: "set_positions", positions: [0,0,500,500,500,500] }</code></p>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f40d;</span><span class="help-tip-text">Use the <b>Python Snippet</b> button in Export to copy a ready-to-run asyncio consumer.</span></div>
+        </div>
+
+        <div class="help-section" id="hsec-shortcuts">
+          <div class="help-h1">Keyboard Shortcuts</div>
+          <p class="help-p">Default key mappings (reassignable in the <b>Key Map</b> tab):</p>
+          <div class="help-grid">
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">O</span> Open</div><div class="help-card-desc">All fingers fully open</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">F</span> Fist</div><div class="help-card-desc">All fingers closed</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">P</span> Point</div><div class="help-card-desc">Index extended</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">V</span> Peace</div><div class="help-card-desc">Index + Middle</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">N</span> Pinch</div><div class="help-card-desc">Thumb + Index pinch</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">K</span> OK</div><div class="help-card-desc">OK gesture</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">G</span> Gun</div><div class="help-card-desc">Gun gesture</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">C</span> Claw</div><div class="help-card-desc">Half-curl claw</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">R</span> Rock</div><div class="help-card-desc">Rock gesture</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">T</span> Three</div><div class="help-card-desc">Three fingers</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">D</span> Demo</div><div class="help-card-desc">Run the demo sequence</div></div>
+            <div class="help-card"><div class="help-card-title"><span class="help-kbd">Space</span></div><div class="help-card-desc">Open hand (reset)</div></div>
+          </div>
+          <div class="help-tip"><span class="help-tip-icon">&#x1f3b9;</span><span class="help-tip-text"><b>MIDI</b> is also supported. Any MIDI device connected to the browser gets note-on events mapped to poses by index. Open the Key Map tab to customise all bindings.</span></div>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>
@@ -1084,6 +1448,11 @@ function switchTab(name){
   document.querySelectorAll(".dev-content > div").forEach(p=>p.classList.remove("active"));
   document.getElementById("tab-"+name).classList.add("active");
   if(name==="export")updateExportStats();
+  if(name==="pca")pcaRender();
+}
+function helpNav(sec){
+  document.querySelectorAll('.help-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
+  document.querySelectorAll('.help-section').forEach(s=>s.classList.toggle('active',s.id==='hsec-'+sec));
 }
 
 // ── Drawer ─────────────────────────────────────────────
@@ -1139,7 +1508,7 @@ function connect(){
     }
     if(d.touch)updateTactile(d.touch);
     updateHandViz(sliderVals);
-    if(!chartPaused)drawChart();
+    if(!chartPaused){drawChart();drawRadar();}
 
     const frame={ts:d.ts||Date.now(),positions:[...sliderVals],touch:d.touch?d.touch.map(t=>({normal:t.normal,tangential:t.tangential,proximity:t.proximity})):null};
     frameBuffer.push(frame);if(frameBuffer.length>MAX_BUFFER)frameBuffer.shift();
@@ -1323,7 +1692,7 @@ window.addEventListener("resize",drawChart);
   ch1.addEventListener("mousedown",e=>startDrag(e,"left"));ch2.addEventListener("mousedown",e=>startDrag(e,"right"));
   window.addEventListener("mousemove",e=>{
     if(!drag)return;const delta=e.clientX-drag.startX;
-    if(drag.side==="left")lcol.style.width=Math.max(160,Math.min(520,drag.startW+delta))+"px";
+    if(drag.side==="left")lcol.style.width=Math.max(160,Math.min(700,drag.startW+delta))+"px";
     else{const ccol=document.getElementById("ccol");ccol.style.width=Math.max(160,Math.min(600,drag.startW+delta))+"px";}
     drawChart();
   });
@@ -1392,12 +1761,366 @@ function _clsRenderBars(candidates){
       const orig=ws.onmessage;
       ws.onmessage=function(ev){
         if(orig)orig.call(ws,ev);
-        try{const d=JSON.parse(ev.data);if(d.positions&&knnModel)_clsPredict(d.positions);}catch(e){}
+        try{
+          const d=JSON.parse(ev.data);
+          if(d.positions&&knnModel)_clsPredict(d.positions);
+          if(d.positions)alertCheck(d.positions,d.touch);
+          if(d.positions)heatmapUpdate(d.touch);
+          if(motRecording&&d.positions){
+            motRecording.frames.push({ts:d.ts||Date.now(),positions:[...d.positions]});
+            document.getElementById('motFrameCount').textContent=motRecording.frames.length;
+            const dur=motRecording.frames.length>1?(motRecording.frames[motRecording.frames.length-1].ts-motRecording.frames[0].ts)/1000:0;
+            document.getElementById('motDur').textContent=dur.toFixed(1)+'s';
+          }
+        }catch(e){}
       };
       clearInterval(t);
     }
   },300);
 })();
+
+// ─── Heatmap fingertip overlay ───────────────────────────────────────────────
+const heatCanvas=document.getElementById('heatmapCanvas');
+const heatCtx=heatCanvas.getContext('2d');
+function heatmapUpdate(touch){
+  if(!touch)return;
+  const w=heatCanvas.offsetWidth,h=heatCanvas.offsetHeight;
+  if(!w||!h)return;
+  heatCanvas.width=w;heatCanvas.height=h;
+  heatCtx.clearRect(0,0,w,h);
+  const svgEl=document.getElementById('hand-svg');
+  const vb=svgEl.viewBox.baseVal;
+  const scaleX=w/vb.width,scaleY=h/vb.height;
+  const offX=-vb.x*scaleX,offY=-vb.y*scaleY;
+  FN.forEach((_,i)=>{
+    const tp=tipPos[i];if(!tp)return;
+    const cx=tp.x*scaleX+offX,cy=tp.y*scaleY+offY;
+    const nf=touch[i]?touch[i].normal:0;
+    const t=Math.min(nf/2500,1);
+    const r=Math.round(t*255),g=Math.round((1-t)*200),b=50;
+    const rad=18+t*14;
+    const grad=heatCtx.createRadialGradient(cx,cy,0,cx,cy,rad);
+    grad.addColorStop(0,`rgba(${r},${g},${b},${0.55+t*0.3})`);
+    grad.addColorStop(1,`rgba(${r},${g},${b},0)`);
+    heatCtx.beginPath();heatCtx.arc(cx,cy,rad,0,Math.PI*2);
+    heatCtx.fillStyle=grad;heatCtx.fill();
+  });
+}
+window.addEventListener('resize',()=>{heatCanvas.width=0;});
+
+// ─── Radar chart ─────────────────────────────────────────────────────────────
+let chartMode='line'; // 'line' | 'radar'
+const radarCv=document.getElementById('radarChart');
+const radarCtx=radarCv.getContext('2d');
+function toggleChartMode(){
+  chartMode=chartMode==='line'?'radar':'line';
+  document.getElementById('chartModeBtn').textContent=chartMode==='line'?'Radar':'Line';
+  document.getElementById('chart').style.display=chartMode==='line'?'':'none';
+  radarCv.style.display=chartMode==='radar'?'':'none';
+}
+function drawRadar(){
+  if(chartMode!=='radar'||chartPaused)return;
+  const W=radarCv.offsetWidth,H=radarCv.offsetHeight;
+  if(!W||!H)return;
+  radarCv.width=W*DPR;radarCv.height=H*DPR;
+  radarCtx.scale(DPR,DPR);
+  radarCtx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,maxR=Math.min(cx,cy)*0.78;
+  const n=5,step=Math.PI*2/n;
+  // grid rings
+  [.25,.5,.75,1].forEach(f=>{
+    radarCtx.beginPath();
+    for(let i=0;i<n;i++){const a=-Math.PI/2+i*step;radarCtx.lineTo(cx+Math.cos(a)*maxR*f,cy+Math.sin(a)*maxR*f);}
+    radarCtx.closePath();radarCtx.strokeStyle='rgba(255,255,255,.05)';radarCtx.lineWidth=1;radarCtx.stroke();
+    radarCtx.fillStyle='rgba(255,255,255,.04)';radarCtx.font=`8px JetBrains Mono`;radarCtx.textAlign='left';
+    radarCtx.fillText(Math.round(f*FSCALE),(cx+maxR*f+3).toFixed(0),cy-2);
+  });
+  // axes + labels
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step;
+    radarCtx.beginPath();radarCtx.moveTo(cx,cy);radarCtx.lineTo(cx+Math.cos(a)*maxR,cy+Math.sin(a)*maxR);
+    radarCtx.strokeStyle='rgba(255,255,255,.07)';radarCtx.stroke();
+    radarCtx.fillStyle=FC[i];radarCtx.font=`bold 9px Inter`;radarCtx.textAlign='center';
+    radarCtx.fillText(FN[i],cx+Math.cos(a)*(maxR+14),cy+Math.sin(a)*(maxR+14)+3);
+  }
+  // data polygon
+  radarCtx.beginPath();
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step,f=Math.min(forceLevel[i],1);
+    const x=cx+Math.cos(a)*maxR*f,y=cy+Math.sin(a)*maxR*f;
+    i===0?radarCtx.moveTo(x,y):radarCtx.lineTo(x,y);
+  }
+  radarCtx.closePath();
+  radarCtx.fillStyle='rgba(124,110,255,.18)';radarCtx.fill();
+  radarCtx.strokeStyle='rgba(124,110,255,.75)';radarCtx.lineWidth=1.8;radarCtx.stroke();
+  // dots per finger
+  for(let i=0;i<n;i++){
+    const a=-Math.PI/2+i*step,f=Math.min(forceLevel[i],1);
+    radarCtx.beginPath();radarCtx.arc(cx+Math.cos(a)*maxR*f,cy+Math.sin(a)*maxR*f,4,0,Math.PI*2);
+    radarCtx.fillStyle=FC[i];radarCtx.fill();
+  }
+}
+
+// ─── Force Threshold Alerts ───────────────────────────────────────────────────
+const alertThresholds=FN.map(()=>1500);
+const alertEnabled=FN.map(()=>true);
+let alertAudioCtx=null;
+function alertBeep(freq=880,dur=80){
+  if(!document.getElementById('alertSound').checked)return;
+  try{
+    if(!alertAudioCtx)alertAudioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=alertAudioCtx.createOscillator(),g=alertAudioCtx.createGain();
+    o.connect(g);g.connect(alertAudioCtx.destination);
+    o.frequency.value=freq;g.gain.setValueAtTime(.18,alertAudioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,alertAudioCtx.currentTime+dur/1000);
+    o.start();o.stop(alertAudioCtx.currentTime+dur/1000);
+  }catch(e){}
+}
+function alertTestSound(){alertBeep(660,120);}
+function alertCheck(positions,touch){
+  FN.forEach((_,i)=>{
+    if(!alertEnabled[i])return;
+    const nf=touch&&touch[i]?touch[i].normal:0;
+    const el=document.getElementById('alDot'+i);
+    const firing=nf>=alertThresholds[i];
+    if(el)el.classList.toggle('firing',firing);
+    if(firing&&!el._wasFiring){alertBeep(700+i*80);}
+    if(el)el._wasFiring=firing;
+  });
+}
+function buildAlertRows(){
+  const wrap=document.getElementById('alertRows');wrap.innerHTML='';
+  FN.forEach((name,i)=>{
+    const row=document.createElement('div');row.className='alert-row';
+    row.style.setProperty('--c',FC[i]);
+    row.innerHTML=`
+      <span class="alert-finger" style="color:${FC[i]}">${name}</span>
+      <div class="alert-thresh-wrap">
+        <input type="range" min="50" max="2500" step="50" value="${alertThresholds[i]}"
+          style="--c:${FC[i]}"
+          oninput="alertThresholds[${i}]=+this.value;document.getElementById('alVal${i}').textContent=this.value+' N'"
+          id="alSlider${i}">
+        <input type="range" min="50" max="2500" step="50" value="${alertThresholds[i]}"
+          style="display:none" id="alSlider${i}b">
+        <span class="alert-thresh-val" id="alVal${i}">${alertThresholds[i]} N</span>
+      </div>
+      <div class="alert-active" id="alDot${i}"></div>
+      <button class="alert-toggle on" id="alToggle${i}" onclick="alertToggle(${i})">${alertEnabled[i]?'ON':'OFF'}</button>`;
+    // fix: the range thumb color via inline style doesn't work well; remove hidden duplicate
+    row.querySelector('#alSlider'+i+'b').remove();
+    wrap.appendChild(row);
+    // set thumb color via JS
+    const sl=row.querySelector('#alSlider'+i);
+    sl.style.accentColor=FC[i];
+  });
+}
+function alertToggle(i){
+  alertEnabled[i]=!alertEnabled[i];
+  const btn=document.getElementById('alToggle'+i);
+  btn.textContent=alertEnabled[i]?'ON':'OFF';
+  btn.classList.toggle('on',alertEnabled[i]);
+}
+buildAlertRows();
+
+// ─── Motion Recorder & Replay ─────────────────────────────────────────────────
+let motRecording=null,motions=[],motNextId=1;
+let motPlayAbort=false,motPlaying=false;
+
+function motStartRec(){
+  if(motRecording)return;
+  motRecording={id:motNextId++,name:'motion_'+Date.now(),frames:[]};
+  document.getElementById('motRecBtn').disabled=true;
+  document.getElementById('motStopBtn').disabled=false;
+  document.getElementById('motFrameCount').textContent='0';
+  document.getElementById('motDur').textContent='0.0s';
+}
+function motStopRec(){
+  if(!motRecording||motRecording.frames.length<2)return;
+  motions.push({...motRecording});motRecording=null;
+  document.getElementById('motRecBtn').disabled=false;
+  document.getElementById('motStopBtn').disabled=true;
+  document.getElementById('motionBadge').textContent=motions.length;
+  renderMotionList();
+}
+function renderMotionList(){
+  const list=document.getElementById('motionList');list.innerHTML='';
+  if(!motions.length){list.innerHTML='<div style="font-size:9.5px;color:var(--text3)">No motions recorded yet.</div>';return;}
+  motions.forEach((m,idx)=>{
+    const dur=m.frames.length>1?(m.frames[m.frames.length-1].ts-m.frames[0].ts)/1000:0;
+    const el=document.createElement('div');el.className='motion-item';el.id='motitem'+m.id;
+    el.innerHTML=`<span class="motion-item-name">${m.name}</span>
+      <span class="motion-item-meta">${m.frames.length} frames · ${dur.toFixed(1)}s</span>
+      <div class="motion-item-bar"><div class="motion-item-prog" id="motprog${m.id}"></div></div>
+      <button class="btn-sm primary" onclick="motPlay(${idx})">&#x25b6;</button>
+      <button class="btn-sm" onclick="motRename(${idx})">&#x270e;</button>
+      <button class="btn-sm danger" onclick="motDelete(${idx})">&#x2715;</button>`;
+    list.appendChild(el);
+  });
+}
+function motDelete(idx){motions.splice(idx,1);document.getElementById('motionBadge').textContent=motions.length;renderMotionList();}
+function motRename(idx){
+  const n=prompt('New name:',motions[idx].name);
+  if(n&&n.trim()){motions[idx].name=n.trim();renderMotionList();}
+}
+async function motPlay(idx){
+  if(motPlaying)return;
+  const m=motions[idx];if(!m||m.frames.length<2)return;
+  motPlaying=true;motPlayAbort=false;
+  const speed=parseFloat(document.getElementById('motSpeed').value)||1;
+  const el=document.getElementById('motitem'+m.id);
+  if(el)el.classList.add('playing');
+  const totalDur=(m.frames[m.frames.length-1].ts-m.frames[0].ts)/speed;
+  const startTs=m.frames[0].ts;
+  const wallStart=performance.now();
+  for(let fi=0;fi<m.frames.length&&!motPlayAbort;fi++){
+    const f=m.frames[fi];
+    const targetWall=(f.ts-startTs)/speed;
+    while(performance.now()-wallStart<targetWall&&!motPlayAbort)await new Promise(r=>setTimeout(r,8));
+    if(motPlayAbort)break;
+    f.positions.forEach((v,i)=>{sliderVals[i]=v;const sl=document.getElementById('sl'+i);if(sl)sl.value=v;setTileVal(i,v);});
+    sendPositions();updateHandViz(sliderVals);
+    const prog=document.getElementById('motprog'+m.id);
+    if(prog)prog.style.width=((fi/(m.frames.length-1))*100)+'%';
+  }
+  motPlaying=false;if(el)el.classList.remove('playing');
+  const prog=document.getElementById('motprog'+m.id);if(prog)prog.style.width='0%';
+}
+
+// ─── PCA (2-component, hand-rolled power iteration) ───────────────────────────
+const PCA_COLORS=['#a78bfa','#60a5fa','#34d399','#fbbf24','#f87171','#f472b6','#38bdf8','#fb923c','#a3e635','#e879f9'];
+let pcaClassColors={};
+function pcaRender(){
+  const cv=document.getElementById('pcaCanvas');
+  const ctx=cv.getContext('2d');
+  if(!labelsList.length){ctx.clearRect(0,0,cv.width,cv.height);return;}
+  const data=labelsList.map(l=>l.positions.map(v=>v/1000));
+  const n=data.length,d=6;
+  // center
+  const mean=Array(d).fill(0);
+  data.forEach(x=>x.forEach((v,i)=>mean[i]+=v));
+  mean.forEach((_,i)=>mean[i]/=n);
+  const X=data.map(x=>x.map((v,i)=>v-mean[i]));
+  // covariance
+  const cov=Array.from({length:d},()=>Array(d).fill(0));
+  X.forEach(x=>x.forEach((a,i)=>x.forEach((b,j)=>cov[i][j]+=a*b/(n-1))));
+  // power iteration for PC1 and PC2
+  function powerIter(cov,iters=60){
+    let v=Array(d).fill(0);v[0]=1;
+    for(let it=0;it<iters;it++){
+      const w=Array(d).fill(0);
+      v.forEach((vi,i)=>cov[i].forEach((c,j)=>w[j]+=c*vi));
+      const norm=Math.sqrt(w.reduce((s,x)=>s+x*x,0))||1;
+      v=w.map(x=>x/norm);
+    }
+    return v;
+  }
+  const pc1=powerIter(cov);
+  // deflate
+  const cov2=cov.map((row,i)=>row.map((c,j)=>c-pc1[i]*pc1[j]*pc1.reduce((s,v,k)=>s+cov[k][j]*v,0)));
+  const pc2=powerIter(cov2);
+  // project
+  const proj=X.map(x=>([pc1.reduce((s,v,i)=>s+v*x[i],0),pc2.reduce((s,v,i)=>s+v*x[i],0)]));
+  const xs=proj.map(p=>p[0]),ys=proj.map(p=>p[1]);
+  const minX=Math.min(...xs),maxX=Math.max(...xs)||1,minY=Math.min(...ys),maxY=Math.max(...ys)||1;
+  const W=cv.offsetWidth,H=cv.offsetHeight;
+  cv.width=W*DPR;cv.height=H*DPR;
+  ctx.scale(DPR,DPR);ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='var(--surface2,#0f1018)';ctx.fillRect(0,0,W,H);
+  const pad=28;
+  const toX=v=>pad+(v-minX)/(maxX-minX+1e-9)*(W-2*pad);
+  const toY=v=>H-pad-(v-minY)/(maxY-minY+1e-9)*(H-2*pad);
+  // grid
+  ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(W/2,pad);ctx.lineTo(W/2,H-pad);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad,H/2);ctx.lineTo(W-pad,H/2);ctx.stroke();
+  // points
+  const classes=[...new Set(labelsList.map(l=>l.label))];
+  classes.forEach((c,ci)=>{if(!pcaClassColors[c])pcaClassColors[c]=PCA_COLORS[ci%PCA_COLORS.length];});
+  proj.forEach((p,pi)=>{
+    const label=labelsList[pi].label;
+    ctx.beginPath();ctx.arc(toX(p[0]),toY(p[1]),5,0,Math.PI*2);
+    ctx.fillStyle=pcaClassColors[label];ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.4)';ctx.lineWidth=.8;ctx.stroke();
+  });
+  // legend
+  const leg=document.getElementById('pcaLegend');leg.innerHTML='';
+  classes.forEach(c=>{
+    const el=document.createElement('div');el.className='pca-leg-item';
+    el.innerHTML=`<div class="pca-leg-dot" style="background:${pcaClassColors[c]}"></div>${c}`;
+    leg.appendChild(el);
+  });
+}
+
+// ─── Keyboard / MIDI Mapping ──────────────────────────────────────────────────
+const DEFAULT_MAPPINGS=[
+  {key:'o',action:'pose:open'},{key:'f',action:'pose:fist'},{key:'p',action:'pose:point'},
+  {key:'v',action:'pose:peace'},{key:'n',action:'pose:pinch'},{key:'k',action:'pose:ok'},
+  {key:'g',action:'pose:gun'},{key:'c',action:'pose:claw'},{key:'r',action:'pose:rock'},
+  {key:'t',action:'pose:three'},{key:'d',action:'demo'},{key:' ',action:'pose:open'},
+];
+let keyMappings=[...DEFAULT_MAPPINGS.map(m=>({...m}))];
+let mapListening=-1;
+let midiAccess=null;
+
+function applyMapping(action){
+  if(action.startsWith('pose:')){sendPose(action.slice(5));}
+  else if(action==='demo'){runDemo();}
+}
+function mapReset(){keyMappings=DEFAULT_MAPPINGS.map(m=>({...m}));renderMapRows();}
+function mapAddRow(){keyMappings.push({key:'?',action:'pose:open'});renderMapRows();}
+function mapListen(idx){
+  mapListening=idx;
+  const btn=document.getElementById('mapEditBtn'+idx);
+  if(btn){btn.textContent='press key…';btn.classList.add('listening');}
+}
+function renderMapRows(){
+  const wrap=document.getElementById('mapRows');wrap.innerHTML='';
+  keyMappings.forEach((m,i)=>{
+    const el=document.createElement('div');el.className='map-row';
+    const poseOpts=Object.keys(POSES).map(p=>`<option value="pose:${p}"${m.action==='pose:'+p?' selected':''}>Pose: ${p}</option>`).join('');
+    el.innerHTML=`<span class="map-key" id="mapKey${i}">${m.key==='  '?'Space':m.key.toUpperCase()}</span>
+      <select class="map-action seq-select" id="mapAct${i}" onchange="keyMappings[${i}].action=this.value">
+        ${poseOpts}
+        <option value="demo"${m.action==='demo'?' selected':''}>Run Demo</option>
+      </select>
+      <button class="map-edit-btn" id="mapEditBtn${i}" onclick="mapListen(${i})">Edit Key</button>
+      <button class="map-edit-btn" style="border-color:rgba(240,62,90,.25);color:var(--red)" onclick="keyMappings.splice(${i},1);renderMapRows()">&#x2715;</button>`;
+    wrap.appendChild(el);
+  });
+}
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT'){
+    if(mapListening>=0){mapListening=-1;}
+    return;
+  }
+  if(mapListening>=0){
+    const idx=mapListening;mapListening=-1;
+    keyMappings[idx].key=e.key===' '?'Space':e.key.toLowerCase();
+    renderMapRows();
+    return;
+  }
+  const found=keyMappings.find(m=>m.key===(e.key===' '?'Space':e.key.toLowerCase()));
+  if(found){e.preventDefault();applyMapping(found.action);}
+});
+// MIDI
+if(navigator.requestMIDIAccess){
+  navigator.requestMIDIAccess().then(acc=>{
+    midiAccess=acc;
+    acc.inputs.forEach(input=>{
+      input.onmidimessage=ev=>{
+        const [status,note,vel]=ev.data;
+        if((status&0xF0)===0x90&&vel>0){
+          // map MIDI note to pose by index
+          const idx=note%Object.keys(POSES).length;
+          const pose=Object.keys(POSES)[idx];
+          sendPose(pose);
+        }
+      };
+    });
+  }).catch(()=>{});
+}
+renderMapRows();
+
 
 // ─── Pose Sequencer ──────────────────────────────────────────────────────────
 let seqSteps=[],seqNextId=1,seqRunning=false,seqAbort=false;
