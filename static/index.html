@@ -424,6 +424,28 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
 .map-edit-btn{padding:2px 8px;border-radius:4px;font-size:11px;background:var(--surface3);border:1px solid var(--border-hi);color:var(--text2);cursor:pointer;font-family:inherit;transition:all .12s}
 .map-edit-btn:hover{border-color:var(--border-focus);color:var(--text)}
 .map-edit-btn.listening{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ─── Mode Navigation ─────────────────────────────────────────────────────── */
+.mode-nav{display:flex;align-items:center;padding:0 16px;height:42px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.mode-nav::-webkit-scrollbar{display:none}
+.mode-btn{display:flex;align-items:center;gap:6px;padding:0 18px;height:42px;font-size:14px;font-weight:500;color:var(--text3);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;transition:color .14s,border-color .14s;font-family:inherit;white-space:nowrap;position:relative;top:1px}
+.mode-btn:hover{color:var(--text2)}.mode-btn.active{color:var(--text);border-bottom-color:var(--accent)}
+.mode-help-btn{display:flex;align-items:center;gap:6px;padding:0 16px;height:28px;font-size:13px;font-weight:600;color:var(--accent);background:var(--accent-dim);border:1px solid rgba(88,164,176,.25);border-radius:6px;cursor:pointer;font-family:inherit;transition:background .12s,color .12s;white-space:nowrap;margin-left:auto;flex-shrink:0}
+.mode-help-btn:hover{background:rgba(88,164,176,.18)}.mode-help-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+/* ─── Mode Panes ──────────────────────────────────────────────────────────── */
+.mode-pane{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden}.mode-pane.active{display:flex}
+#mp-help{position:relative}
+/* ─── Sub Navigation ──────────────────────────────────────────────────────── */
+.sub-nav{display:flex;align-items:center;gap:3px;padding:0 16px;height:40px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface2);overflow-x:auto;scrollbar-width:none}
+.sub-nav::-webkit-scrollbar{display:none}
+.sub-btn{display:flex;align-items:center;gap:5px;padding:5px 14px;border-radius:6px;font-size:13px;font-weight:500;background:transparent;border:1px solid transparent;color:var(--text3);cursor:pointer;font-family:inherit;transition:all .12s;white-space:nowrap}
+.sub-btn:hover{color:var(--text2);background:rgba(255,255,255,.04)}.sub-btn.active{background:var(--surface3);border-color:var(--border-hi);color:var(--text)}
+.sub-content{flex:1;position:relative;overflow:hidden;min-height:0}
+/* ─── Device Picker ───────────────────────────────────────────────────────── */
+.device-picker-wrap{display:flex;align-items:center;gap:8px;padding:0 16px;border-left:1px solid var(--border-hi)}
+.device-picker-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.device-picker{height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border-hi);color:var(--text);padding:0 28px 0 10px;font-family:inherit;font-size:13px;outline:none;cursor:pointer;transition:border-color .12s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fb8c0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
+.device-picker:focus{border-color:var(--border-focus)}
 </style>
 </head>
 <body>
@@ -453,6 +475,13 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
     <div class="h-metric"><span class="h-metric-val" id="framecnt">0</span><span class="h-metric-unit">frames</span></div>
     <div class="h-metric"><span class="h-metric-val" id="sessiontime">0:00</span><span class="h-metric-unit">session</span></div>
   </div>
+  <div class="device-picker-wrap">
+    <span class="device-picker-label">Hand</span>
+    <select class="device-picker" id="devicePicker" onchange="switchDevice(this.value)">
+      <option value="brainco">BrainCo Revo2Touch</option>
+      <option value="inspire">Inspire Dex RH56dfq</option>
+    </select>
+  </div>
   <div class="h-right">
     <div class="h-tag">SDK v1.4</div>
     <button id="recBtn" class="h-btn h-btn-rec" onclick="toggleRecording()"><span class="dot"></span>Record</button>
@@ -460,6 +489,14 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
   </div>
 </header>
 
+<nav class="mode-nav">
+  <button class="mode-btn active" id="mbtn-control" onclick="switchMode('control')">&#x1f91a; Control</button>
+  <button class="mode-btn" id="mbtn-data" onclick="switchMode('data')">&#x1f4be; Data</button>
+  <button class="mode-btn" id="mbtn-analysis" onclick="switchMode('analysis')">&#x1f9e0; Analysis</button>
+  <button class="mode-btn" id="mbtn-sequences" onclick="switchMode('sequences')">&#x1f3b5; Sequences</button>
+  <button class="mode-help-btn" id="mbtn-help" onclick="switchMode('help')">&#x2753; Help</button>
+</nav>
+<div class="mode-pane active" id="mp-control">
 <!-- WORKSPACE -->
 <div class="workspace" id="workspace">
 
@@ -590,68 +627,16 @@ run();</textarea>
     </div>
   </div>
 
-</div>
+</div></div><!-- /mp-control -->
 
-<!-- DEV DRAWER -->
-<div class="drawer-handle" id="drawerHandle"></div>
-<div class="dev-drawer" id="devDrawer" style="height:196px">
-  <div class="dev-tabs">
-    <div class="dev-tab active" data-tab="stream" onclick="switchTab('stream')">
-      Stream Inspector <span class="dev-tab-badge" id="streamBadge">0</span>
-    </div>
-    <div class="dev-tab" data-tab="logger" onclick="switchTab('logger')">
-      Data Logger <span class="dev-tab-badge" id="loggerBadge">0</span>
-    </div>
-    <div class="dev-tab" data-tab="recorder" onclick="switchTab('recorder')">
-      Session Recorder
-    </div>
-    <div class="dev-tab" data-tab="labels" onclick="switchTab('labels')">
-      Labels <span class="dev-tab-badge" id="labelsBadge">0</span>
-    </div>
-    <div class="dev-tab" data-tab="export" onclick="switchTab('export')">
-      Export
-    </div>
-    <div class="dev-tab" data-tab="classifier" onclick="switchTab('classifier')">
-      Classifier <span class="dev-tab-badge" id="clsBadge">0</span>
-    </div>
-    <div class="dev-tab" data-tab="sequencer" onclick="switchTab('sequencer')">
-      Sequencer
-    </div>
-    <div class="dev-tab" data-tab="motion" onclick="switchTab('motion')">
-      Motion Rec <span class="dev-tab-badge" id="motionBadge">0</span>
-    </div>
-    <div class="dev-tab" data-tab="alerts" onclick="switchTab('alerts')">
-      Alerts
-    </div>
-    <div class="dev-tab" data-tab="pca" onclick="switchTab('pca')">
-      PCA
-    </div>
-    <div class="dev-tab" data-tab="mapping" onclick="switchTab('mapping')">
-      Key Map
-    </div>
-    <div class="dev-tab" data-tab="help" onclick="switchTab('help')">
-      &#x2753; Help
-    </div>
-    <div class="dev-tab-actions">
-      <button class="dev-mini-btn" id="drawerToggleBtn" onclick="toggleDrawer()">&#9660; Collapse</button>
-    </div>
+<div class="mode-pane" id="mp-data">
+  <div class="sub-nav">
+    <button class="sub-btn active" data-tab="recorder" onclick="switchSubTab('data','recorder')">&#x23fa; Sessions</button>
+    <button class="sub-btn" data-tab="stream" onclick="switchSubTab('data','stream')">&#x1f4e1; Stream <span id="streamBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="logger" onclick="switchSubTab('data','logger')">&#x1f4cb; Logger <span id="loggerBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="export" onclick="switchSubTab('data','export')">&#x2b07;&#xfe0f; Export</button>
   </div>
-  <div class="dev-content">
-    <!-- Stream -->
-    <div class="stream-inspector active" id="tab-stream">
-      <div class="stream-empty" id="streamEmpty">Waiting for data&hellip;</div>
-    </div>
-    <!-- Logger -->
-    <div class="logger-panel" id="tab-logger">
-      <table class="logger-table">
-        <thead><tr>
-          <th>#</th><th>Time</th><th>Thumb</th><th>ThAux</th><th>Index</th><th>Middle</th><th>Ring</th><th>Pinky</th>
-          <th>F0(N)</th><th>F1(N)</th><th>F2(N)</th><th>F3(N)</th><th>F4(N)</th>
-        </tr></thead>
-        <tbody id="loggerBody"></tbody>
-      </table>
-    </div>
-    <!-- Recorder -->
+  <div class="sub-content">
     <div class="recorder-panel" id="tab-recorder">
       <div class="rec-controls">
         <button class="btn-sm primary" id="recStartBtn" onclick="startSessionRec()">&#9679; Start Recording</button>
@@ -664,20 +649,18 @@ run();</textarea>
         <div style="font-size:12px;color:var(--text3)">No recorded sessions yet. Click Start Recording to begin.</div>
       </div>
     </div>
-    <!-- Labels -->
-    <div class="labels-panel" id="tab-labels">
-      <div class="label-controls">
-        <input type="text" class="label-input" id="labelInput" placeholder="Label name (e.g. open, grasp_cup)" onkeydown="if(event.key==='Enter')captureLabel()"/>
-        <button class="btn-sm primary" onclick="captureLabel()">+ Capture</button>
-        <button class="btn-sm" onclick="clearLabels()">Clear</button>
-        <button class="btn-sm" onclick="exportLabels()">&#x2B07; CSV</button>
-        <span class="rec-info" style="margin-left:auto">Labels: <b id="labelCount">0</b></span>
-      </div>
-      <div class="labels-list" id="labelsList">
-        <div style="font-size:12px;color:var(--text3)">No labels captured. Type a name and press Enter.</div>
-      </div>
+    <div class="stream-inspector" id="tab-stream">
+      <div class="stream-empty" id="streamEmpty">Waiting for data&hellip;</div>
     </div>
-    <!-- Export -->
+    <div class="logger-panel" id="tab-logger">
+      <table class="logger-table">
+        <thead><tr>
+          <th>#</th><th>Time</th><th>Thumb</th><th>ThAux</th><th>Index</th><th>Middle</th><th>Ring</th><th>Pinky</th>
+          <th>F0(N)</th><th>F1(N)</th><th>F2(N)</th><th>F3(N)</th><th>F4(N)</th>
+        </tr></thead>
+        <tbody id="loggerBody"></tbody>
+      </table>
+    </div>
     <div class="export-panel" id="tab-export">
       <div class="export-stats">
         <div class="export-stat"><span class="export-stat-val" id="expFrames">0</span><span class="export-stat-lbl">Frames buffered</span></div>
@@ -694,7 +677,17 @@ run();</textarea>
         <div class="export-card"><div class="export-card-title">Python Snippet</div><div class="export-card-desc">Ready-to-run asyncio snippet for consuming the WebSocket stream programmatically.</div><button class="export-card-btn" onclick="copyPySnippet()">&#x2398; Copy Snippet</button></div>
       </div>
     </div>
-    <!-- Classifier -->
+  </div>
+</div>
+
+<div class="mode-pane" id="mp-analysis">
+  <div class="sub-nav">
+    <button class="sub-btn active" data-tab="classifier" onclick="switchSubTab('analysis','classifier')">&#x1f9e0; Classifier <span id="clsBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="pca" onclick="switchSubTab('analysis','pca')">&#x1f4ca; PCA</button>
+    <button class="sub-btn" data-tab="labels" onclick="switchSubTab('analysis','labels')">&#x1f3f7;&#xfe0f; Labels <span id="labelsBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="motion" onclick="switchSubTab('analysis','motion')">&#x23f1;&#xfe0f; Motion Rec <span id="motionBadge" class="dev-tab-badge">0</span></button>
+  </div>
+  <div class="sub-content">
     <div class="classifier-panel" id="tab-classifier">
       <div class="cls-status">
         <div class="cls-pred-label">Live Prediction</div>
@@ -715,7 +708,53 @@ run();</textarea>
         </div>
       </div>
     </div>
-    <!-- Sequencer -->
+    <div class="pca-panel" id="tab-pca">
+      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
+        <span class="sec-title">PCA Scatter (labeled samples)</span>
+        <button class="btn-sm primary" onclick="pcaRender()">&#x21bb; Recompute</button>
+        <span style="font-size:11px;color:var(--text3)">Live point updates as data streams in</span>
+      </div>
+      <div class="pca-wrap"><canvas id="pcaCanvas"></canvas></div>
+      <div class="pca-legend" id="pcaLegend"></div>
+    </div>
+    <div class="labels-panel" id="tab-labels">
+      <div class="label-controls">
+        <input type="text" class="label-input" id="labelInput" placeholder="Label name (e.g. open, grasp_cup)" onkeydown="if(event.key==='Enter')captureLabel()"/>
+        <button class="btn-sm primary" onclick="captureLabel()">+ Capture</button>
+        <button class="btn-sm" onclick="clearLabels()">Clear</button>
+        <button class="btn-sm" onclick="exportLabels()">&#x2B07; CSV</button>
+        <span class="rec-info" style="margin-left:auto">Labels: <b id="labelCount">0</b></span>
+      </div>
+      <div class="labels-list" id="labelsList">
+        <div style="font-size:12px;color:var(--text3)">No labels captured. Type a name and press Enter.</div>
+      </div>
+    </div>
+    <div class="motion-panel" id="tab-motion">
+      <div class="motion-controls">
+        <button class="btn-sm primary" id="motRecBtn" onclick="motStartRec()">&#9679; Record Motion</button>
+        <button class="btn-sm" id="motStopBtn" onclick="motStopRec()" disabled>&#9632; Stop</button>
+        <span class="rec-info">Frames: <b id="motFrameCount">0</b></span>
+        <span class="rec-info">Duration: <b id="motDur">0.0s</b></span>
+      </div>
+      <div class="motion-speed-row">
+        <span>Playback speed</span>
+        <input type="range" id="motSpeed" min="0.1" max="3" step="0.1" value="1" oninput="document.getElementById('motSpeedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
+        <span id="motSpeedVal">1.0x</span>
+      </div>
+      <div class="motion-list" id="motionList">
+        <div style="font-size:12px;color:var(--text3)">No motions recorded yet. Click Record Motion to begin.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mode-pane" id="mp-sequences">
+  <div class="sub-nav">
+    <button class="sub-btn active" data-tab="sequencer" onclick="switchSubTab('sequences','sequencer')">&#x1f3b5; Sequencer</button>
+    <button class="sub-btn" data-tab="mapping" onclick="switchSubTab('sequences','mapping')">&#x2328;&#xfe0f; Key Map</button>
+    <button class="sub-btn" data-tab="alerts" onclick="switchSubTab('sequences','alerts')">&#x1f514; Alerts</button>
+  </div>
+  <div class="sub-content">
     <div class="sequencer-panel" id="tab-sequencer">
       <div class="seq-toolbar">
         <button class="btn-sm primary" id="seqPlayBtn" onclick="seqPlay()">&#x25b6; Play</button>
@@ -752,47 +791,6 @@ run();</textarea>
       </div>
       <div class="seq-playbar"><div class="seq-playbar-fill" id="seqPlaybarFill"></div></div>
     </div>
-
-    <!-- Motion Recorder -->
-    <div class="motion-panel" id="tab-motion">
-      <div class="motion-controls">
-        <button class="btn-sm primary" id="motRecBtn" onclick="motStartRec()">&#9679; Record Motion</button>
-        <button class="btn-sm" id="motStopBtn" onclick="motStopRec()" disabled>&#9632; Stop</button>
-        <span class="rec-info">Frames: <b id="motFrameCount">0</b></span>
-        <span class="rec-info">Duration: <b id="motDur">0.0s</b></span>
-      </div>
-      <div class="motion-speed-row">
-        <span>Playback speed</span>
-        <input type="range" id="motSpeed" min="0.1" max="3" step="0.1" value="1" oninput="document.getElementById('motSpeedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
-        <span id="motSpeedVal">1.0x</span>
-      </div>
-      <div class="motion-list" id="motionList">
-        <div style="font-size:12px;color:var(--text3)">No motions recorded yet. Click Record Motion to begin.</div>
-      </div>
-    </div>
-
-    <!-- Force Alerts -->
-    <div class="alerts-panel" id="tab-alerts">
-      <div class="alert-global">
-        <span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)">Force Threshold Alerts</span>
-        <label class="alert-sound-label"><input type="checkbox" id="alertSound" style="accent-color:var(--accent)"> Sound</label>
-        <button class="btn-sm" onclick="alertTestSound()">Test Beep</button>
-      </div>
-      <div id="alertRows"></div>
-    </div>
-
-    <!-- PCA -->
-    <div class="pca-panel" id="tab-pca">
-      <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
-        <span class="sec-title">PCA Scatter (labeled samples)</span>
-        <button class="btn-sm primary" onclick="pcaRender()">&#x21bb; Recompute</button>
-        <span style="font-size:11px;color:var(--text3)">Live point updates as data streams in</span>
-      </div>
-      <div class="pca-wrap"><canvas id="pcaCanvas"></canvas></div>
-      <div class="pca-legend" id="pcaLegend"></div>
-    </div>
-
-    <!-- Key / MIDI Mapping -->
     <div class="mapping-panel" id="tab-mapping">
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap">
         <span class="sec-title">Keyboard &amp; MIDI Mapping</span>
@@ -802,8 +800,19 @@ run();</textarea>
       </div>
       <div id="mapRows" style="display:flex;flex-direction:column;gap:4px;flex:1;overflow:auto;min-height:0"></div>
     </div>
+    <div class="alerts-panel" id="tab-alerts">
+      <div class="alert-global">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text2)">Force Threshold Alerts</span>
+        <label class="alert-sound-label"><input type="checkbox" id="alertSound" style="accent-color:var(--accent)"> Sound</label>
+        <button class="btn-sm" onclick="alertTestSound()">Test Beep</button>
+      </div>
+      <div id="alertRows"></div>
+    </div>
+  </div>
+</div>
 
-    <!-- Help / Tutorial -->
+<div class="mode-pane" id="mp-help">
+  <div style="position:relative;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column">
     <div class="help-panel" id="tab-help">
       <div class="help-nav">
         <button class="help-nav-btn active" data-sec="overview" onclick="helpNav('overview')">Overview</button>
@@ -1002,6 +1011,8 @@ run();</textarea>
     </div>
   </div>
 </div>
+
+
 
 <div id="hand-tooltip"></div>
 
@@ -1440,43 +1451,71 @@ function updateExportStats(){
   document.getElementById("expSessions").textContent=sessions.length;
 }
 
-// ── Tabs ───────────────────────────────────────────────
-function switchTab(name){
-  document.querySelectorAll(".dev-tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===name));
-  document.querySelectorAll(".dev-content > div").forEach(p=>p.classList.remove("active"));
-  document.getElementById("tab-"+name).classList.add("active");
-  if(name==="export")updateExportStats();
-  if(name==="pca")pcaRender();
+// ── Mode Navigation ───────────────────────────────────────
+let currentMode='control';
+function switchMode(name){
+  currentMode=name;
+  document.querySelectorAll('.mode-btn,.mode-help-btn').forEach(b=>b.classList.toggle('active',b.id==='mbtn-'+name));
+  document.querySelectorAll('.mode-pane').forEach(p=>p.classList.toggle('active',p.id==='mp-'+name));
+  if(name==='data')switchSubTab('data','recorder');
+  if(name==='analysis')switchSubTab('analysis','classifier');
+  if(name==='sequences')switchSubTab('sequences','sequencer');
+  if(name==='help'){const h=document.getElementById('tab-help');if(h)h.classList.add('active');}
 }
+
+// ── Sub-tab Navigation ─────────────────────────────────
+function switchSubTab(mode,name){
+  const pane=document.getElementById('mp-'+mode);
+  if(!pane)return;
+  pane.querySelectorAll('.sub-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  pane.querySelectorAll('.sub-content > div').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById('tab-'+name);
+  if(t)t.classList.add('active');
+  if(name==='export')updateExportStats();
+  if(name==='pca')pcaRender();
+}
+
+// ── Legacy switchTab shim (backward compat) ────────────────
+function switchTab(name){
+  const map={stream:'data',logger:'data',recorder:'data',export:'data',
+    classifier:'analysis',pca:'analysis',labels:'analysis',motion:'analysis',
+    sequencer:'sequences',mapping:'sequences',alerts:'sequences',help:'help'};
+  const mode=map[name];
+  if(!mode)return;
+  switchMode(mode);
+  if(mode!=='help')switchSubTab(mode,name);
+}
+
 function helpNav(sec){
   document.querySelectorAll('.help-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.sec===sec));
   document.querySelectorAll('.help-section').forEach(s=>s.classList.toggle('active',s.id==='hsec-'+sec));
 }
 
-// ── Drawer ─────────────────────────────────────────────
-let drawerCollapsed=false,drawerH=196;
-function toggleDrawer(){
-  drawerCollapsed=!drawerCollapsed;
-  const drawer=document.getElementById("devDrawer");
-  const btn=document.getElementById("drawerToggleBtn");
-  drawer.style.height=drawerCollapsed?"32px":drawerH+"px";
-  btn.innerHTML=drawerCollapsed?"&#9650; Expand":"&#9660; Collapse";
+// ── Device Configuration ───────────────────────────────────
+const DEVICE_CONFIGS={
+  brainco:{name:'BrainCo Revo2Touch',motors:['Thumb','ThAux','Index','Middle','Ring','Pinky'],sensors:['Thumb','Index','Middle','Ring','Pinky']},
+  inspire:{name:'Inspire Dex RH56dfq',motors:['Little','Ring','Middle','Index','Thumb B','Thumb R'],sensors:['Little','Ring','Middle','Index','Thumb']}
+};
+let currentDevice='brainco';
+function switchDevice(id){
+  currentDevice=id;
+  const cfg=DEVICE_CONFIGS[id]||DEVICE_CONFIGS.brainco;
+  const sub=document.querySelector('.h-logo-sub');
+  if(sub)sub.textContent=cfg.name+' · Dev Console';
+  const pl=document.querySelector('.palm-label');
+  if(pl)pl.textContent=cfg.name.split(' ')[0];
+  for(let i=0;i<cfg.motors.length;i++){
+    const tile=document.getElementById('ftiles')?.querySelectorAll('.ftile-name')[i];
+    if(tile)tile.textContent=cfg.motors[i];
+  }
+  for(let i=0;i<cfg.sensors.length;i++){
+    const fc=document.getElementById('fc'+i);
+    const fl=fc?.querySelector('.flabel');
+    if(fl&&fl.childNodes[0]&&fl.childNodes[0].nodeType===3)fl.childNodes[0].textContent=cfg.sensors[i];
+  }
+  const ths=document.querySelectorAll('.logger-table thead th');
+  ['#','Time',...cfg.motors].forEach((n,i)=>{if(ths[i])ths[i].textContent=n;});
 }
-(function(){
-  const handle=document.getElementById("drawerHandle");
-  const drawer=document.getElementById("devDrawer");
-  let drag=null;
-  handle.addEventListener("mousedown",e=>{e.preventDefault();handle.classList.add("dragging");drag={startY:e.clientY,startH:drawer.offsetHeight};});
-  window.addEventListener("mousemove",e=>{
-    if(!drag)return;
-    const delta=drag.startY-e.clientY;
-    drawerH=Math.max(32,Math.min(window.innerHeight*.62,drag.startH+delta));
-    drawer.style.height=drawerH+"px";
-    if(drawerCollapsed&&drawerH>40){drawerCollapsed=false;document.getElementById("drawerToggleBtn").innerHTML="&#9660; Collapse";}
-    drawChart();
-  });
-  window.addEventListener("mouseup",()=>{if(drag){handle.classList.remove("dragging");drag=null;}});
-})();
 
 // ── WebSocket ──────────────────────────────────────────
 const hbdot=document.getElementById("hbdot"),hbtext=document.getElementById("hbtext");
