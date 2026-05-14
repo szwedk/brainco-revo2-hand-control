@@ -483,11 +483,11 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
 </header>
 
 <nav class="mode-nav">
-  <button class="mode-btn active" id="mbtn-control" onclick="switchMode('control')">&#x1f91a; Control</button>
-  <button class="mode-btn" id="mbtn-data" onclick="switchMode('data')">&#x1f4be; Data</button>
-  <button class="mode-btn" id="mbtn-analysis" onclick="switchMode('analysis')">&#x1f9e0; Analysis</button>
-  <button class="mode-btn" id="mbtn-sequences" onclick="switchMode('sequences')">&#x1f3b5; Sequences</button>
-  <button class="mode-help-btn" id="mbtn-help" onclick="switchMode('help')">&#x2753; Help</button>
+  <button class="mode-btn active" id="mbtn-control" onclick="switchMode('control')">Control</button>
+  <button class="mode-btn" id="mbtn-data" onclick="switchMode('data')">Data</button>
+  <button class="mode-btn" id="mbtn-analysis" onclick="switchMode('analysis')">Analysis</button>
+  <button class="mode-btn" id="mbtn-sequences" onclick="switchMode('sequences')">Sequences</button>
+  <button class="mode-help-btn" id="mbtn-help" onclick="switchMode('help')">Help</button>
 </nav>
 <div class="mode-pane active" id="mp-control">
 <!-- WORKSPACE -->
@@ -624,10 +624,10 @@ run();</textarea>
 
 <div class="mode-pane" id="mp-data">
   <div class="sub-nav">
-    <button class="sub-btn active" data-tab="recorder" onclick="switchSubTab('data','recorder')">&#x23fa; Sessions</button>
-    <button class="sub-btn" data-tab="stream" onclick="switchSubTab('data','stream')">&#x1f4e1; Stream <span id="streamBadge" class="dev-tab-badge">0</span></button>
-    <button class="sub-btn" data-tab="logger" onclick="switchSubTab('data','logger')">&#x1f4cb; Logger <span id="loggerBadge" class="dev-tab-badge">0</span></button>
-    <button class="sub-btn" data-tab="export" onclick="switchSubTab('data','export')">&#x2b07;&#xfe0f; Export</button>
+    <button class="sub-btn active" data-tab="recorder" onclick="switchSubTab('data','recorder')">Sessions</button>
+    <button class="sub-btn" data-tab="stream" onclick="switchSubTab('data','stream')">Stream <span id="streamBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="logger" onclick="switchSubTab('data','logger')">Logger <span id="loggerBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="export" onclick="switchSubTab('data','export')">Export</button>
   </div>
   <div class="sub-content">
     <div class="recorder-panel" id="tab-recorder">
@@ -675,10 +675,10 @@ run();</textarea>
 
 <div class="mode-pane" id="mp-analysis">
   <div class="sub-nav">
-    <button class="sub-btn active" data-tab="classifier" onclick="switchSubTab('analysis','classifier')">&#x1f9e0; Classifier <span id="clsBadge" class="dev-tab-badge">0</span></button>
-    <button class="sub-btn" data-tab="pca" onclick="switchSubTab('analysis','pca')">&#x1f4ca; PCA</button>
-    <button class="sub-btn" data-tab="labels" onclick="switchSubTab('analysis','labels')">&#x1f3f7;&#xfe0f; Labels <span id="labelsBadge" class="dev-tab-badge">0</span></button>
-    <button class="sub-btn" data-tab="motion" onclick="switchSubTab('analysis','motion')">&#x23f1;&#xfe0f; Motion Rec <span id="motionBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn active" data-tab="classifier" onclick="switchSubTab('analysis','classifier')">Classifier <span id="clsBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="pca" onclick="switchSubTab('analysis','pca')">PCA</button>
+    <button class="sub-btn" data-tab="labels" onclick="switchSubTab('analysis','labels')">Labels <span id="labelsBadge" class="dev-tab-badge">0</span></button>
+    <button class="sub-btn" data-tab="motion" onclick="switchSubTab('analysis','motion')">Motion Rec <span id="motionBadge" class="dev-tab-badge">0</span></button>
   </div>
   <div class="sub-content">
     <div class="classifier-panel" id="tab-classifier">
@@ -743,9 +743,9 @@ run();</textarea>
 
 <div class="mode-pane" id="mp-sequences">
   <div class="sub-nav">
-    <button class="sub-btn active" data-tab="sequencer" onclick="switchSubTab('sequences','sequencer')">&#x1f3b5; Sequencer</button>
-    <button class="sub-btn" data-tab="mapping" onclick="switchSubTab('sequences','mapping')">&#x2328;&#xfe0f; Key Map</button>
-    <button class="sub-btn" data-tab="alerts" onclick="switchSubTab('sequences','alerts')">&#x1f514; Alerts</button>
+    <button class="sub-btn active" data-tab="sequencer" onclick="switchSubTab('sequences','sequencer')">Sequencer</button>
+    <button class="sub-btn" data-tab="mapping" onclick="switchSubTab('sequences','mapping')">Key Map</button>
+    <button class="sub-btn" data-tab="alerts" onclick="switchSubTab('sequences','alerts')">Alerts</button>
   </div>
   <div class="sub-content">
     <div class="sequencer-panel" id="tab-sequencer">
