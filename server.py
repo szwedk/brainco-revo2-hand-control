@@ -8,17 +8,89 @@ Run:
 Then open: http://localhost:8765
 """
 
-import sys, os, asyncio, json, time, pathlib
+import sys, os, asyncio, json, time, pathlib, logging
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brainco-hand-sdk", "python"))
 
 from aiohttp import web
 from bc_stark_sdk import main_mod as sdk
+
+try:
+    from pymodbus.client import AsyncModbusTcpClient
+    # Silence pymodbus connection noise — we log our own clean messages
+    logging.getLogger("pymodbus").setLevel(logging.CRITICAL)
+    HAS_PYMODBUS = True
+except ImportError:
+    HAS_PYMODBUS = False
+    print("[inspire] pymodbus not found — Inspire hands disabled. Run: pip install pymodbus")
+
+# Silence BrainCo SDK internal modbus noise (slave[127] timeout messages)
+logging.getLogger("bc_stark_sdk").setLevel(logging.CRITICAL)
 
 PORT      = "/dev/cu.usbserial-FTAHKGS21"
 BAUD      = sdk.Baudrate.Baud460800
 SLAVE_ID  = 127
 HTTP_PORT = 8765
 STATIC    = pathlib.Path(__file__).parent / "static"
+
+# ── Inspire Hand Config (from README: github.com/feraco/insprehands) ──────────
+# Hardware: Inspire RH56DFTP Dexterous Hand × 2, Modbus TCP
+# Finger order: [0:Little, 1:Ring, 2:Middle, 3:Index, 4:Thumb-bend, 5:Thumb-rotate]
+# 0 = fully open, 1000 = fully closed
+INSPIRE_LEFT_IP   = "192.168.124.210"
+INSPIRE_RIGHT_IP  = "192.168.124.211"
+INSPIRE_PORT      = 6000
+INSPIRE_REG_SPEED  = 1522   # Speed set (1–1000)
+INSPIRE_REG_ANGLES = 1486   # Angle set target (0–1000)
+INSPIRE_REG_ACTUAL = 1546   # Actual angles (read-only)
+
+# ── Config file (persists IP assignments across restarts) ─────────────────────
+CONFIG_FILE = pathlib.Path(__file__).parent / "inspire_config.json"
+
+def _load_config() -> dict:
+    cfg = {"left": INSPIRE_LEFT_IP, "right": INSPIRE_RIGHT_IP}
+    if CONFIG_FILE.exists():
+        try:
+            saved = json.loads(CONFIG_FILE.read_text())
+            cfg.update({k: v for k, v in saved.items() if k in ("left", "right")})
+        except Exception:
+            pass
+    return cfg
+
+def _save_config(cfg: dict):
+    CONFIG_FILE.write_text(json.dumps(cfg, indent=2))
+
+# Mutable — updated at runtime via the /api/inspire/config endpoint
+INSPIRE_HANDS: dict = _load_config()
+
+INSPIRE_RETRY_INTERVAL = 10.0   # seconds between reconnect attempts when offline
+inspire_retry_after: dict = {"left": 0.0, "right": 0.0}
+
+# Pose library — finger order: [Little, Ring, Middle, Index, Thumb-bend, Thumb-rotate]
+INSPIRE_POSES = {
+    "open":   [0,    0,    0,    0,    0,    0  ],
+    "fist":   [1000, 1000, 1000, 1000, 1000, 500],
+    "point":  [1000, 1000, 1000, 0,    1000, 500],
+    "peace":  [1000, 1000, 0,    0,    900,  500],
+    "pinch":  [1000, 1000, 1000, 500,  500,  500],
+    "ok":     [0,    0,    0,    800,  200,  500],
+    "gun":    [1000, 1000, 1000, 0,    0,    0  ],
+    "claw":   [500,  500,  500,  500,  500,  500],
+    "spread": [0,    0,    0,    0,    0,    0  ],
+    "relax":  [300,  300,  300,  300,  200,  500],
+    "three":  [1000, 0,    0,    0,    1000, 500],
+    "rock":   [0,    1000, 1000, 0,    1000, 500],
+    "thumbs": [1000, 1000, 1000, 1000, 0,    500],
+}
+
+inspire_state = {
+    "left_connected":  False,
+    "right_connected": False,
+    "left_angles":     [0] * 6,
+    "right_angles":    [0] * 6,
+    "left_ip":         INSPIRE_HANDS["left"],
+    "right_ip":        INSPIRE_HANDS["right"],
+}
+inspire_conns: dict = {}   # "left" | "right" → AsyncModbusTcpClient
 
 # ── global state ──────────────────────────────────────────────────────────────
 state = {
@@ -101,11 +173,104 @@ async def hand_loop(app):
 
                 await asyncio.sleep(0.04)   # ~25 Hz
 
-        except Exception as e:
-            print(f"[hand] Error: {e}. Retrying in 3s…")
+        except Exception:
             state["connected"] = False
             hand_ctx = None
+            print("[hand] Not connected — retrying in 3s…")
             await asyncio.sleep(3)
+
+
+# ── Inspire Hand helpers ───────────────────────────────────────────────────────
+async def _inspire_write(client, angles: list, speed: int = 500):
+    await client.write_registers(address=INSPIRE_REG_SPEED,  values=[speed] * 6)
+    await client.write_registers(address=INSPIRE_REG_ANGLES, values=angles)
+
+
+async def _inspire_send_all(angles: list, speed: int = 500):
+    """Send the same angle set to every connected Inspire hand."""
+    for side, client in list(inspire_conns.items()):
+        if client.connected:
+            try:
+                await _inspire_write(client, angles, speed)
+            except Exception as e:
+                print(f"[inspire] send {side}: {e}")
+
+
+async def _inspire_wave():
+    for _ in range(3):
+        await _inspire_send_all([0] * 6, speed=300)
+        await asyncio.sleep(0.4)
+        await _inspire_send_all([500] * 6, speed=300)
+        await asyncio.sleep(0.4)
+    await _inspire_send_all([0] * 6, speed=300)
+
+
+# ── Inspire hand connection loop ───────────────────────────────────────────────
+async def inspire_loop(app):
+    if not HAS_PYMODBUS:
+        return
+    while True:
+        now = time.monotonic()
+
+        # Attempt (re)connection only after backoff expires
+        for side in ("left", "right"):
+            ip = INSPIRE_HANDS.get(side, "")
+            if not ip:
+                continue
+            already = inspire_conns.get(side)
+            if already and already.connected:
+                continue
+            if now < inspire_retry_after.get(side, 0.0):
+                continue   # still in backoff window
+            print(f"[inspire] Trying {side} hand @ {ip}:{INSPIRE_PORT}…")
+            client = AsyncModbusTcpClient(ip, port=INSPIRE_PORT, timeout=2)
+            try:
+                await client.connect()
+                if client.connected:
+                    inspire_conns[side] = client
+                    inspire_state[f"{side}_connected"] = True
+                    inspire_retry_after[side] = 0.0
+                    print(f"[inspire] {side} hand connected ✓  ({ip})")
+                else:
+                    inspire_state[f"{side}_connected"] = False
+                    inspire_retry_after[side] = now + INSPIRE_RETRY_INTERVAL
+                    print(f"[inspire] {side} unreachable — retry in {int(INSPIRE_RETRY_INTERVAL)}s")
+            except Exception:
+                inspire_state[f"{side}_connected"] = False
+                inspire_retry_after[side] = now + INSPIRE_RETRY_INTERVAL
+                print(f"[inspire] {side} unreachable — retry in {int(INSPIRE_RETRY_INTERVAL)}s")
+
+        # Poll angles on connected hands
+        for side, client in list(inspire_conns.items()):
+            if not client.connected:
+                inspire_state[f"{side}_connected"] = False
+                inspire_conns.pop(side, None)
+                inspire_retry_after[side] = time.monotonic() + INSPIRE_RETRY_INTERVAL
+                continue
+            try:
+                r = await client.read_holding_registers(address=INSPIRE_REG_ACTUAL, count=6)
+                if not r.isError():
+                    inspire_state[f"{side}_angles"] = list(r.registers)
+                inspire_state[f"{side}_connected"] = True
+            except Exception:
+                inspire_state[f"{side}_connected"] = False
+                inspire_conns.pop(side, None)
+                inspire_retry_after[side] = time.monotonic() + INSPIRE_RETRY_INTERVAL
+
+        # Always broadcast current IPs so the UI stays in sync
+        inspire_state["left_ip"]  = INSPIRE_HANDS.get("left",  "")
+        inspire_state["right_ip"] = INSPIRE_HANDS.get("right", "")
+
+        msg = json.dumps({"type": "inspire", **inspire_state})
+        dead = set()
+        for ws in list(clients):
+            try:
+                await ws.send_str(msg)
+            except Exception:
+                dead.add(ws)
+        clients.difference_update(dead)
+
+        await asyncio.sleep(0.2)   # 5 Hz — light polling
 
 
 # ── WebSocket handler ─────────────────────────────────────────────────────────
@@ -123,24 +288,46 @@ async def ws_handler(request):
 
 
 async def handle_command(data: str):
-    if hand_ctx is None:
-        return
     try:
         cmd = json.loads(data)
         t = cmd.get("type")
-        if t == "set_positions":
-            await hand_ctx.set_finger_positions(SLAVE_ID, cmd["positions"])
-        elif t == "pose":
-            poses = {
-                "open":  [0,   0,   0,    0,    0,    0],
-                "fist":  [800, 800, 1000, 1000, 1000, 1000],
-                "point": [800, 800, 0,    1000, 1000, 1000],
-                "peace": [800, 800, 0,    0,    1000, 1000],
-                "pinch": [500, 0,   500,  0,    0,    0],
-            }
-            p = poses.get(cmd.get("name"))
-            if p:
-                await hand_ctx.set_finger_positions(SLAVE_ID, p)
+
+        # ── BrainCo commands ──────────────────────────────────────────────────
+        if t in ("set_positions", "pose"):
+            if hand_ctx is None:
+                return
+            if t == "set_positions":
+                await hand_ctx.set_finger_positions(SLAVE_ID, cmd["positions"])
+            elif t == "pose":
+                poses = {
+                    "open":   [0,   0,   0,    0,    0,    0],
+                    "fist":   [800, 800, 1000, 1000, 1000, 1000],
+                    "point":  [800, 800, 0,    1000, 1000, 1000],
+                    "peace":  [800, 800, 0,    0,    1000, 1000],
+                    "pinch":  [500, 0,   500,  0,    0,    0],
+                    "ok":     [700, 600, 700,  0,    0,    0],
+                    "gun":    [0,   0,   0,    1000, 1000, 1000],
+                    "claw":   [0,   0,   500,  500,  500,  500],
+                    "spread": [0,   0,   0,    0,    0,    0],
+                    "relax":  [300, 200, 300,  300,  300,  300],
+                    "three":  [800, 800, 0,    0,    0,    1000],
+                    "rock":   [0,   0,   1000, 1000, 0,    0],
+                }
+                p = poses.get(cmd.get("name"))
+                if p:
+                    await hand_ctx.set_finger_positions(SLAVE_ID, p)
+
+        # ── Inspire commands ──────────────────────────────────────────────────
+        elif t == "inspire_pose":
+            angles = INSPIRE_POSES.get(cmd.get("name"))
+            if angles:
+                await _inspire_send_all(angles, speed=cmd.get("speed", 500))
+        elif t == "inspire_set_positions":
+            angles = cmd.get("positions", [0] * 6)
+            await _inspire_send_all(angles, speed=cmd.get("speed", 500))
+        elif t == "inspire_wave":
+            asyncio.create_task(_inspire_wave())
+
     except Exception as e:
         print(f"[cmd] {e}")
 
@@ -149,15 +336,85 @@ async def handle_command(data: str):
 async def index(request):
     return web.FileResponse(STATIC / "index.html")
 
+
+async def api_inspire_config_get(request):
+    """Return current Inspire hand IP configuration."""
+    return web.json_response({
+        "left":  INSPIRE_HANDS.get("left",  ""),
+        "right": INSPIRE_HANDS.get("right", ""),
+        "port":  INSPIRE_PORT,
+    })
+
+
+async def api_inspire_config_post(request):
+    """Update Inspire hand IPs, close stale connections, persist to disk."""
+    try:
+        body = await request.json()
+        new_left  = str(body.get("left",  INSPIRE_HANDS.get("left",  ""))).strip()
+        new_right = str(body.get("right", INSPIRE_HANDS.get("right", ""))).strip()
+        for side, new_ip in (("left", new_left), ("right", new_right)):
+            if INSPIRE_HANDS.get(side) != new_ip:
+                old = inspire_conns.pop(side, None)
+                if old:
+                    try: old.close()
+                    except Exception: pass
+                inspire_state[f"{side}_connected"] = False
+                inspire_retry_after[side] = 0.0   # connect immediately
+        INSPIRE_HANDS["left"]  = new_left
+        INSPIRE_HANDS["right"] = new_right
+        inspire_state["left_ip"]  = new_left
+        inspire_state["right_ip"] = new_right
+        _save_config({"left": new_left, "right": new_right})
+        print(f"[inspire] config updated — left={new_left}  right={new_right}")
+        return web.json_response({"ok": True, "left": new_left, "right": new_right})
+    except Exception as e:
+        return web.json_response({"ok": False, "error": str(e)}, status=400)
+
+
+async def api_inspire_scan(request):
+    """Scan 192.168.124.200-215 + known IPs and return responding Inspire hands."""
+    if not HAS_PYMODBUS:
+        return web.json_response({"error": "pymodbus not installed"}, status=500)
+    found = {}
+    candidates = {f"192.168.124.{i}" for i in range(200, 216)}
+    candidates.update([INSPIRE_LEFT_IP, INSPIRE_RIGHT_IP])
+    async def _probe(ip):
+        c = AsyncModbusTcpClient(ip, port=INSPIRE_PORT, timeout=1)
+        try:
+            await c.connect()
+            if c.connected:
+                r = await c.read_holding_registers(address=1000, count=1)
+                if not r.isError():
+                    found[ip] = {"hand_id": r.registers[0]}
+                c.close()
+        except Exception:
+            pass
+    await asyncio.gather(*[_probe(ip) for ip in candidates])
+    return web.json_response(found)
+
+async def api_restart(request):
+    """Restart the server process (used by the UI restart button)."""
+    import threading
+    def _do_restart():
+        import time
+        time.sleep(0.3)
+        os.execv(sys.executable, [sys.executable] + sys.argv)
+    threading.Thread(target=_do_restart, daemon=True).start()
+    return web.json_response({"ok": True})
+
 async def on_startup(app):
-    app["hand_task"] = asyncio.create_task(hand_loop(app))
+    app["hand_task"]    = asyncio.create_task(hand_loop(app))
+    app["inspire_task"] = asyncio.create_task(inspire_loop(app))
 
 async def on_cleanup(app):
-    app["hand_task"].cancel()
-    try:
-        await app["hand_task"]
-    except asyncio.CancelledError:
-        pass
+    for key in ("hand_task", "inspire_task"):
+        task = app.get(key)
+        if task:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
 
 
 def main():
@@ -165,10 +422,16 @@ def main():
     app = web.Application()
     app.router.add_get("/",    index)
     app.router.add_get("/ws", ws_handler)
+    app.router.add_get( "/api/inspire/config", api_inspire_config_get)
+    app.router.add_post("/api/inspire/config", api_inspire_config_post)
+    app.router.add_get( "/api/inspire/scan",   api_inspire_scan)
+    app.router.add_post("/api/restart",         api_restart)
     app.router.add_static("/static", STATIC)
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)
+    cfg = _load_config()
     print(f"Open http://localhost:{HTTP_PORT}  (Ctrl+C to stop)")
+    print(f"[inspire] Left={cfg['left']}  Right={cfg['right']}  Port={INSPIRE_PORT}")
     web.run_app(app, host="127.0.0.1", port=HTTP_PORT, access_log=None)
 
 

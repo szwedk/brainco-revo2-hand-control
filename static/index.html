@@ -446,6 +446,51 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
 .device-picker-label{font-size:11px;font-weight:700;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .device-picker{height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border-hi);color:var(--text);padding:0 28px 0 10px;font-family:inherit;font-size:13px;outline:none;cursor:pointer;transition:border-color .12s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fb8c0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center}
 .device-picker:focus{border-color:var(--border-focus)}
+/* ── Inspire Setup Modal ──────────────────────────────────────────────────── */
+#inspire-modal-backdrop{position:fixed;inset:0;background:rgba(4,15,22,.82);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;animation:fadeInBd .18s ease}
+@keyframes fadeInBd{from{opacity:0}to{opacity:1}}
+#inspire-modal{background:var(--surface);border:1px solid var(--border-hi);border-radius:14px;padding:28px 32px;width:420px;max-width:94vw;box-shadow:0 24px 64px rgba(0,0,0,.6),0 0 0 1px rgba(88,164,176,.08);animation:slideUpM .2s cubic-bezier(.22,.68,0,1.2)}
+@keyframes slideUpM{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+#inspire-modal h2{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px}
+#inspire-modal .modal-sub{font-size:13px;color:var(--text3);margin-bottom:24px;line-height:1.6}
+#inspire-modal .modal-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+#inspire-modal .modal-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:background .3s}
+#inspire-modal .modal-dot.ok{background:var(--green)}
+#inspire-modal .modal-label{font-size:12px;font-weight:600;color:var(--text2);width:16px;text-align:center;flex-shrink:0}
+#inspire-modal input[type=text]{flex:1;height:34px;border-radius:7px;background:var(--surface2);border:1px solid var(--border-hi);color:var(--text);font-family:var(--mono);font-size:13px;padding:0 10px;outline:none;transition:border-color .12s}
+#inspire-modal input[type=text]:focus{border-color:var(--border-focus)}
+#inspire-modal .modal-actions{display:flex;align-items:center;gap:10px;margin-top:8px}
+#inspire-modal .modal-btn-primary{flex:1;height:36px;border-radius:8px;background:var(--accent);border:none;color:#000;font-size:14px;font-weight:700;cursor:pointer;transition:all .14s;font-family:inherit}
+#inspire-modal .modal-btn-primary:hover{background:#6bbcc8}
+#inspire-modal .modal-btn-scan{height:36px;border-radius:8px;background:transparent;border:1px solid var(--border-hi);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .14s;font-family:inherit;padding:0 14px}
+#inspire-modal .modal-btn-scan:hover{border-color:var(--border-focus);color:var(--text);background:var(--accent-dim)}
+#inspire-modal .modal-skip{font-size:12px;color:var(--text3);cursor:pointer;margin-left:auto;text-decoration:underline;text-underline-offset:3px;background:none;border:none;font-family:inherit;padding:0}
+#inspire-modal .modal-skip:hover{color:var(--text2)}
+
+/* ── Onboarding Modals ─────────────────────────────────────────────────── */
+#device-select-backdrop,#onboarding-backdrop{position:fixed;inset:0;background:rgba(4,15,22,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:10000;display:flex;align-items:center;justify-content:center;animation:fadeInBd .18s ease}
+#device-select-modal{background:var(--surface);border:1px solid var(--border-hi);border-radius:16px;padding:36px 40px;width:520px;max-width:95vw;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:slideUpM .22s cubic-bezier(.22,.68,0,1.2)}
+#device-select-modal h2{font-size:22px;font-weight:800;color:var(--text);margin-bottom:8px;text-align:center}
+#device-select-modal .dsm-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:28px;line-height:1.6}
+#device-select-modal .dsm-cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:8px}
+.dsm-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:24px 18px;cursor:pointer;transition:all .18s;text-align:center;user-select:none}
+.dsm-card:hover{border-color:var(--accent);background:var(--accent-dim);transform:translateY(-2px);box-shadow:0 6px 20px rgba(88,164,176,.15)}
+.dsm-card:active{transform:translateY(0)}
+.dsm-card-icon{font-size:38px;display:block;margin-bottom:12px}
+.dsm-card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+.dsm-card-desc{font-size:12px;color:var(--text3);line-height:1.5}
+#onboarding-modal{background:var(--surface);border:1px solid var(--border-hi);border-radius:16px;padding:32px 36px;width:660px;max-width:96vw;max-height:88vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.7);animation:slideUpM .22s cubic-bezier(.22,.68,0,1.2)}
+#onboarding-modal h2{font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px}
+#onboarding-modal .ob-sub{font-size:13px;color:var(--text3);margin-bottom:22px;line-height:1.6}
+#onboarding-modal .ob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.ob-card{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 12px}
+.ob-card-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.ob-card-desc{font-size:11px;color:var(--text3);line-height:1.5}
+#onboarding-modal .ob-actions{display:flex;justify-content:flex-end;gap:12px;align-items:center}
+#onboarding-modal .ob-start{height:38px;border-radius:9px;background:var(--accent);border:none;color:#000;font-size:14px;font-weight:700;cursor:pointer;transition:all .14s;font-family:inherit;padding:0 28px}
+#onboarding-modal .ob-start:hover{background:#6bbcc8}
+#onboarding-modal .ob-help-link{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;background:none;border:none;font-family:inherit;padding:0}
+#onboarding-modal .ob-help-link:hover{color:var(--text2)}
 </style>
 </head>
 <body>
@@ -475,10 +520,33 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
       <option value="inspire">Inspire Dex RH56dfq</option>
     </select>
   </div>
+  <!-- Inspire controls (hidden when BrainCo selected) -->
+  <div id="inspire-status" style="display:none;align-items:center;gap:6px;padding:0 12px;border-left:1px solid var(--border-hi)">
+    <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);flex-shrink:0">Inspire</span>
+    <!-- Left hand -->
+    <span id="inspire-l-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);transition:background .4s;flex-shrink:0" title="Left hand"></span>
+    <span style="font-size:11px;color:var(--text3);flex-shrink:0">L</span>
+    <input id="inspire-l-ip" type="text" value="192.168.124.210"
+      style="width:118px;height:22px;border-radius:5px;background:var(--surface2);border:1px solid var(--border-hi);color:var(--text);font-family:var(--mono);font-size:11px;padding:0 6px;outline:none;"
+      onfocus="this.style.borderColor='var(--border-focus)'" onblur="this.style.borderColor='var(--border-hi)'"
+      onkeydown="if(event.key==='Enter')applyInspireIPs()" placeholder="192.168.124.210">
+    <!-- Right hand -->
+    <span id="inspire-r-dot" style="width:7px;height:7px;border-radius:50%;background:var(--text3);transition:background .4s;flex-shrink:0;margin-left:4px" title="Right hand"></span>
+    <span style="font-size:11px;color:var(--text3);flex-shrink:0">R</span>
+    <input id="inspire-r-ip" type="text" value="192.168.124.211"
+      style="width:118px;height:22px;border-radius:5px;background:var(--surface2);border:1px solid var(--border-hi);color:var(--text);font-family:var(--mono);font-size:11px;padding:0 6px;outline:none;"
+      onfocus="this.style.borderColor='var(--border-focus)'" onblur="this.style.borderColor='var(--border-hi)'"
+      onkeydown="if(event.key==='Enter')applyInspireIPs()" placeholder="192.168.124.211">
+    <!-- Actions -->
+    <button class="h-btn" onclick="applyInspireIPs()" title="Apply IP addresses" style="padding:0 9px;height:24px;font-size:12px">Apply</button>
+    <button class="h-btn" id="scanBtn" onclick="scanInspireHands()" title="Scan network for Inspire hands" style="padding:0 9px;height:24px;font-size:12px">&#x1f50d; Scan</button>
+    <button id="waveBtn" class="h-btn" onclick="if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:'inspire_wave'}))" style="padding:0 9px;height:24px;font-size:12px">&#x1f44b; Wave</button>
+  </div>
   <div class="h-right">
     <div class="h-tag">SDK v1.4</div>
     <button id="recBtn" class="h-btn h-btn-rec" onclick="toggleRecording()"><span class="dot"></span>Record</button>
     <button id="mirrorBtn" class="h-btn" onclick="toggleMirror()"><span class="dot"></span>Mirror</button>
+    <button id="restartBtn" class="h-btn" onclick="restartServer()" title="Restart the Python server process" style="border-color:rgba(219,157,71,.4);color:var(--yellow)">&#x21BA; Restart Server</button>
   </div>
 </header>
 
@@ -556,6 +624,8 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
           <button class="pbtn" onclick="sendPose('relax')"><span class="em">&#x1f4a4;</span>Relax</button>
           <button class="pbtn" onclick="sendPose('rock')"><span class="em">&#x1f918;</span>Rock</button>
           <button class="pbtn" onclick="sendPose('three')"><span class="em">3&#xfe0f;&#x20e3;</span>Three</button>
+          <button class="pbtn" id="wavebtn" onclick="if(ws&&ws.readyState===1&&currentDevice==='inspire')ws.send(JSON.stringify({type:'inspire_wave'}))" style="display:none"><span class="em">&#x1f44b;</span>Wave</button>
+          <button class="pbtn" id="thumbsbtn" onclick="sendPose('thumbs')" style="display:none"><span class="em">&#x1f44d;</span>Thumbs</button>
           <button class="pbtn wide" id="demobtn" onclick="runDemo()"><span class="em">&#x25b6;</span>Run Demo</button>
         </div>
         <div class="seq-bar"><div class="seq-fill" id="seqfill" style="width:0%"></div></div>
@@ -1030,6 +1100,24 @@ const POSES = {
   relax:  [300, 200, 300,  300,  300,  300],
   three:  [800, 800, 0,    0,    0,    1000],
   rock:   [0,   0,   1000, 1000, 0,    0],
+};
+// Inspire RH56DFTP pose library
+// Finger order: [Little, Ring, Middle, Index, Thumb-bend, Thumb-rotate]
+// IPs: Left=192.168.124.210  Right=192.168.124.211  Port=6000
+const INSPIRE_POSES = {
+  open:   [0,    0,    0,    0,    0,    0  ],
+  fist:   [1000, 1000, 1000, 1000, 1000, 500],
+  point:  [1000, 1000, 1000, 0,    1000, 500],
+  peace:  [1000, 1000, 0,    0,    900,  500],
+  pinch:  [1000, 1000, 1000, 500,  500,  500],
+  ok:     [0,    0,    0,    800,  200,  500],
+  gun:    [1000, 1000, 1000, 0,    0,    0  ],
+  claw:   [500,  500,  500,  500,  500,  500],
+  spread: [0,    0,    0,    0,    0,    0  ],
+  relax:  [300,  300,  300,  300,  200,  500],
+  three:  [1000, 0,    0,    0,    1000, 500],
+  rock:   [0,    1000, 1000, 0,    1000, 500],
+  thumbs: [1000, 1000, 1000, 1000, 0,    500],
 };
 const DEMO_SEQ = [
   {pose:"open",dur:1200},{pose:"fist",dur:1200},{pose:"point",dur:900},
@@ -1508,6 +1596,15 @@ function switchDevice(id){
   }
   const ths=document.querySelectorAll('.logger-table thead th');
   ['#','Time',...cfg.motors].forEach((n,i)=>{if(ths[i])ths[i].textContent=n;});
+  // Show Inspire status panel only when Inspire is selected
+  const inspStatus=document.getElementById('inspire-status');
+  if(inspStatus)inspStatus.style.display=id==='inspire'?'flex':'none';
+  // Show Inspire-only pose buttons
+  ['wavebtn','thumbsbtn'].forEach(bid=>{
+    const b=document.getElementById(bid);
+    if(b)b.style.display=id==='inspire'?'':'none';
+  });
+  if(id==='inspire')setTimeout(showInspireModal,80);
 }
 
 // ── WebSocket ──────────────────────────────────────────
@@ -1519,6 +1616,127 @@ function setBadge(state,text){
   hbtext.className="h-status-label"+(state==="ok"?" ok":state==="err"?" err":"");
   hbtext.textContent=text;
 }
+// ── Onboarding flow ───────────────────────────────────────────────────────
+async function restartServer(){
+  const btn=document.getElementById('restartBtn');
+  btn.disabled=true; btn.textContent='Restarting…';
+  try{ await fetch('/api/restart',{method:'POST'}); }catch(_){}
+  // Wait for server to come back up then reload
+  setTimeout(async()=>{
+    for(let i=0;i<20;i++){
+      try{ const r=await fetch('/'); if(r.ok){location.reload();return;} }catch(_){}
+      await new Promise(r=>setTimeout(r,500));
+    }
+    btn.disabled=false; btn.innerHTML='&#x21BA; Restart Server';
+  },800);
+}
+let _onboardFromInspire = false;
+function showDeviceSelectModal(){
+  document.getElementById('device-select-backdrop').style.display='flex';
+}
+function selectDevice(type){
+  document.getElementById('device-select-backdrop').style.display='none';
+  switchDevice(type);
+  if(type==='inspire'){
+    _onboardFromInspire=true;
+    showInspireModal();
+  } else {
+    showOnboardingModal();
+  }
+}
+function showOnboardingModal(){
+  document.getElementById('onboarding-backdrop').style.display='flex';
+}
+function closeOnboardingModal(openHelp){
+  document.getElementById('onboarding-backdrop').style.display='none';
+  if(openHelp) switchMode('help');
+}
+
+// ── Inspire IP configuration helpers ─────────────────────────────────────────
+async function showInspireModal(){
+  const backdrop=document.getElementById('inspire-modal-backdrop');
+  if(!backdrop)return;
+  try{
+    const cfg=await fetch('/api/inspire/config').then(r=>r.json());
+    const ml=document.getElementById('modal-l-ip');
+    const mr=document.getElementById('modal-r-ip');
+    if(ml)ml.value=cfg.left||'192.168.124.210';
+    if(mr)mr.value=cfg.right||'192.168.124.211';
+  }catch(_){}
+  // Mirror connection dots
+  const lSrc=document.getElementById('inspire-l-dot');
+  const rSrc=document.getElementById('inspire-r-dot');
+  const lDst=document.getElementById('modal-l-dot');
+  const rDst=document.getElementById('modal-r-dot');
+  if(lSrc&&lDst)lDst.className='modal-dot'+(lSrc.style.background.includes('0,201')?' ok':'');
+  if(rSrc&&rDst)rDst.className='modal-dot'+(rSrc.style.background.includes('0,201')?' ok':'');
+  backdrop.style.display='flex';
+  setTimeout(()=>{const i=document.getElementById('modal-l-ip');if(i)i.focus();},120);
+}
+async function closeInspireModal(apply){
+  if(apply){
+    const l=document.getElementById('modal-l-ip')?.value.trim();
+    const r=document.getElementById('modal-r-ip')?.value.trim();
+    const hl=document.getElementById('inspire-l-ip');
+    const hr=document.getElementById('inspire-r-ip');
+    if(hl&&l)hl.value=l;
+    if(hr&&r)hr.value=r;
+    await applyInspireIPs();
+  }
+  document.getElementById('inspire-modal-backdrop').style.display='none';
+  if(_onboardFromInspire){_onboardFromInspire=false;showOnboardingModal();}
+}
+async function scanFromModal(){
+  const btn=document.querySelector('#inspire-modal .modal-btn-scan');
+  if(btn){btn.textContent='Scanning…';btn.disabled=true;}
+  try{
+    const found=await fetch('/api/inspire/scan').then(r=>r.json());
+    const ips=Object.keys(found);
+    if(ips.length===0){alert('No Inspire hands found on 192.168.124.200-215');}
+    else{
+      const ml=document.getElementById('modal-l-ip');
+      const mr=document.getElementById('modal-r-ip');
+      if(ips[0]&&ml)ml.value=ips[0];
+      if(ips[1]&&mr)mr.value=ips[1];
+      const hl=document.getElementById('inspire-l-ip');
+      const hr=document.getElementById('inspire-r-ip');
+      if(ips[0]&&hl)hl.value=ips[0];
+      if(ips[1]&&hr)hr.value=ips[1];
+    }
+  }catch(e){alert('Scan failed: '+e);}
+  finally{if(btn){btn.textContent='🔍 Scan';btn.disabled=false;}}
+}
+async function applyInspireIPs(){
+  const l=document.getElementById('inspire-l-ip').value.trim();
+  const r=document.getElementById('inspire-r-ip').value.trim();
+  if(!l&&!r){alert('Enter at least one IP address.');return;}
+  try{
+    const res=await fetch('/api/inspire/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({left:l,right:r})});
+    const j=await res.json();
+    if(!j.ok){alert('Error: '+j.error);}
+  }catch(e){alert('Could not reach server: '+e);}
+}
+async function scanInspireHands(){
+  const btn=document.getElementById('scanBtn');
+  if(btn){btn.textContent='Scanning…';btn.disabled=true;}
+  try{
+    const res=await fetch('/api/inspire/scan');
+    const found=await res.json();
+    const ips=Object.keys(found);
+    if(ips.length===0){alert('No Inspire hands found on 192.168.124.200-215');}
+    else{
+      const msg='Found:\n'+ips.map(ip=>'  '+ip).join('\n')+'\n\nAssign left/right IPs?';
+      if(confirm(msg)){
+        const lIp=document.getElementById('inspire-l-ip');
+        const rIp=document.getElementById('inspire-r-ip');
+        if(ips[0]&&lIp)lIp.value=ips[0];
+        if(ips[1]&&rIp)rIp.value=ips[1];
+        await applyInspireIPs();
+      }
+    }
+  }catch(e){alert('Scan failed: '+e);}
+  finally{if(btn){btn.textContent='🔍 Scan';btn.disabled=false;}}
+}
 function connect(){
   const proto=location.protocol==="https:"?"wss":"ws";
   ws=new WebSocket(proto+"://"+location.host+"/ws");
@@ -1527,10 +1745,37 @@ function connect(){
   ws.onerror=()=>ws.close();
   ws.onmessage=e=>{
     const d=JSON.parse(e.data);
+
+    // ── Inspire status message ────────────────────────────────────────────────
+    if(d.type==='inspire'){
+      const lDot=document.getElementById('inspire-l-dot');
+      const rDot=document.getElementById('inspire-r-dot');
+      if(lDot)lDot.style.background=d.left_connected?'var(--green)':'var(--text3)';
+      if(rDot)rDot.style.background=d.right_connected?'var(--green)':'var(--text3)';
+      // Sync IP fields with server state (only when not actively editing)
+      const lIpEl=document.getElementById('inspire-l-ip');
+      const rIpEl=document.getElementById('inspire-r-ip');
+      if(lIpEl&&d.left_ip&&document.activeElement!==lIpEl)lIpEl.value=d.left_ip;
+      if(rIpEl&&d.right_ip&&document.activeElement!==rIpEl)rIpEl.value=d.right_ip;
+      // If inspire device is active, update sliders from actual angles
+      if(currentDevice==='inspire'&&(d.left_connected||d.right_connected)){
+        const angles=d.right_connected?d.right_angles:d.left_angles;
+        if(angles&&!dragState&&!mirrorActive&&Date.now()-sliderLock>1500){
+          angles.forEach((p,i)=>{
+            const sl=document.getElementById("sl"+i);
+            if(sl&&document.activeElement!==sl){sl.value=p;sliderVals[i]=p;setTileVal(i,p);}
+          });
+          updateHandViz(sliderVals);
+        }
+      }
+      return;
+    }
+
+    // ── BrainCo stream message ────────────────────────────────────────────────
     if(d.device_info&&!devinfo.textContent.trim())devinfo.textContent=d.device_info;
     if(!d.connected)return;
     totalFrames++;
-    if(d.positions&&!dragState&&!mirrorActive&&Date.now()-sliderLock>1500){
+    if(currentDevice!=='inspire'&&d.positions&&!dragState&&!mirrorActive&&Date.now()-sliderLock>1500){
       d.positions.forEach((p,i)=>{
         const sl=document.getElementById("sl"+i);
         if(sl&&document.activeElement!==sl){sl.value=p;sliderVals[i]=p;setTileVal(i,p);}
@@ -1558,12 +1803,24 @@ function connect(){
   };
 }
 function sendPositions(){
-  if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"set_positions",positions:[...sliderVals]}));
+  if(!ws||ws.readyState!==1)return;
+  if(currentDevice==='inspire'){
+    ws.send(JSON.stringify({type:"inspire_set_positions",positions:[...sliderVals]}));
+  } else {
+    ws.send(JSON.stringify({type:"set_positions",positions:[...sliderVals]}));
+  }
 }
 function sendPose(name){
-  if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"pose",name}));
-  const p=POSES[name];if(!p)return;
-  p.forEach((v,i)=>{sliderVals[i]=v;const sl=document.getElementById("sl"+i);if(sl)sl.value=v;setTileVal(i,v);});
+  if(currentDevice==='inspire'){
+    const p=INSPIRE_POSES[name];
+    if(!p)return;
+    if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"inspire_pose",name}));
+    p.forEach((v,i)=>{sliderVals[i]=v;const sl=document.getElementById("sl"+i);if(sl)sl.value=v;setTileVal(i,v);});
+  } else {
+    if(ws&&ws.readyState===1)ws.send(JSON.stringify({type:"pose",name}));
+    const p=POSES[name];if(!p)return;
+    p.forEach((v,i)=>{sliderVals[i]=v;const sl=document.getElementById("sl"+i);if(sl)sl.value=v;setTileVal(i,v);});
+  }
   updateHandViz(sliderVals);
 }
 async function runDemo(){
@@ -2196,5 +2453,76 @@ function seqStop(internal){
   if(!internal)seqAbort=false;
 }
 </script>
+
+<!-- ── Device Selection Modal ─────────────────────────────────────────────── -->
+<div id="device-select-backdrop" style="display:none">
+  <div id="device-select-modal">
+    <h2>👋 Welcome</h2>
+    <p class="dsm-sub">Select your hand hardware to get started.</p>
+    <div class="dsm-cards">
+      <div class="dsm-card" onclick="selectDevice('brainco')">
+        <span class="dsm-card-icon">🧠</span>
+        <div class="dsm-card-title">BrainCo Revo2Touch</div>
+        <div class="dsm-card-desc">Serial USB connection.<br>Full tactile sensor stream.</div>
+      </div>
+      <div class="dsm-card" onclick="selectDevice('inspire')">
+        <span class="dsm-card-icon">🦾</span>
+        <div class="dsm-card-title">Inspire RH56DFTP</div>
+        <div class="dsm-card-desc">Network TCP/IP connection.<br>Dual hand (left + right).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Onboarding Overview Modal ──────────────────────────────────────────── -->
+<div id="onboarding-backdrop" style="display:none">
+  <div id="onboarding-modal">
+    <h2>🚀 Quick Overview</h2>
+    <p class="ob-sub">Here's what you can do with the Dev Console. You can always revisit this in the <b style="color:var(--text)">Help</b> tab.</p>
+    <div class="ob-grid">
+      <div class="ob-card"><div class="ob-card-title">🖐 Finger Control</div><div class="ob-card-desc">6 sliders (0–1000) control each finger. Click the SVG hand, scroll or drag to adjust.</div></div>
+      <div class="ob-card"><div class="ob-card-title">🤚 Pose Library</div><div class="ob-card-desc">12 built-in poses + sequences. Keyboard shortcuts. Run Demo cycles all poses.</div></div>
+      <div class="ob-card"><div class="ob-card-title">📹 Mirror Mode</div><div class="ob-card-desc">MediaPipe webcam tracking mirrors your live hand posture onto the robot in real time.</div></div>
+      <div class="ob-card"><div class="ob-card-title">✋ Tactile Sensors</div><div class="ob-card-desc">Per-finger force gauges, tangential force, direction vector, and proximity arcs.</div></div>
+      <div class="ob-card"><div class="ob-card-title">🧠 k-NN Classifier</div><div class="ob-card-desc">Train an in-browser gesture classifier on labeled snapshots. Live prediction.</div></div>
+      <div class="ob-card"><div class="ob-card-title">⏱ Motion Replay</div><div class="ob-card-desc">Record continuous motion frames and replay at adjustable speed.</div></div>
+      <div class="ob-card"><div class="ob-card-title">🔔 Force Alerts</div><div class="ob-card-desc">Per-finger threshold alerts with visual indicator and optional audio beep.</div></div>
+      <div class="ob-card"><div class="ob-card-title">📊 Data Export</div><div class="ob-card-desc">Export sessions, labels, and buffers as JSON or CSV. Live WebSocket API.</div></div>
+      <div class="ob-card"><div class="ob-card-title">💻 Custom Code</div><div class="ob-card-desc">Run JS snippets against the live data stream. Full API access in-browser.</div></div>
+    </div>
+    <div class="ob-actions">
+      <button class="ob-help-link" onclick="closeOnboardingModal(true)">Open full Help tab →</button>
+      <button class="ob-start" onclick="closeOnboardingModal(false)">Get Started</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Inspire Setup Modal ────────────────────────────────────────────────── -->
+<div id="inspire-modal-backdrop" style="display:none" onclick="if(event.target===this)closeInspireModal(false)">
+  <div id="inspire-modal">
+    <h2>&#x1F9E4; Inspire Hand Setup</h2>
+    <p class="modal-sub">Enter the IP addresses of your Inspire RH56DFTP hands.<br>You can change these at any time from the header bar.</p>
+    <div class="modal-row">
+      <span class="modal-dot" id="modal-l-dot"></span>
+      <span class="modal-label">L</span>
+      <input type="text" id="modal-l-ip" placeholder="192.168.124.210"
+        onfocus="this.style.borderColor='var(--border-focus)'" onblur="this.style.borderColor='var(--border-hi)'"
+        onkeydown="if(event.key==='Enter')closeInspireModal(true)">
+    </div>
+    <div class="modal-row">
+      <span class="modal-dot" id="modal-r-dot"></span>
+      <span class="modal-label">R</span>
+      <input type="text" id="modal-r-ip" placeholder="192.168.124.211"
+        onfocus="this.style.borderColor='var(--border-focus)'" onblur="this.style.borderColor='var(--border-hi)'"
+        onkeydown="if(event.key==='Enter')closeInspireModal(true)">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-primary" onclick="closeInspireModal(true)">Apply &amp; Connect</button>
+      <button class="modal-btn-scan" onclick="scanFromModal()">🔍 Scan</button>
+      <button class="modal-skip" onclick="closeInspireModal(false)">Skip for now</button>
+    </div>
+  </div>
+</div>
+<script>showDeviceSelectModal();</script>
 </body>
 </html>
