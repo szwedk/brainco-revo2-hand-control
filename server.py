@@ -11,6 +11,12 @@ Then open: http://localhost:8765
 import sys, os, asyncio, json, time, pathlib, logging
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brainco-hand-sdk", "python"))
 
+try:
+    from serial.tools import list_ports as _list_ports
+    HAS_SERIAL_TOOLS = True
+except ImportError:
+    HAS_SERIAL_TOOLS = False
+
 from aiohttp import web
 from bc_stark_sdk import main_mod as sdk
 
@@ -27,6 +33,11 @@ except ImportError:
 logging.getLogger("bc_stark_sdk").setLevel(logging.CRITICAL)
 
 PORT      = "/dev/cu.usbserial-FTAHKGS21"
+
+# Allow port override via config file
+def _get_active_port() -> str:
+    cfg = _load_config() if pathlib.Path(__file__).parent.joinpath("inspire_config.json").exists() else {}
+    return cfg.get("port", PORT)
 BAUD      = sdk.Baudrate.Baud460800
 SLAVE_ID  = 127
 HTTP_PORT = 8765
@@ -113,9 +124,10 @@ hand_ctx = None
 async def hand_loop(app):
     global hand_ctx
     while True:
+        active_port = _get_active_port()
         try:
-            print(f"[hand] Connecting to {PORT}…")
-            hand_ctx = await sdk.modbus_open(PORT, BAUD)
+            print(f"[hand] Connecting to {active_port}…")
+            hand_ctx = await sdk.modbus_open(active_port, BAUD)
             await hand_ctx.set_finger_unit_mode(SLAVE_ID, sdk.FingerUnitMode.Normalized)
 
             # detect capabilities
@@ -402,6 +414,30 @@ async def api_restart(request):
     threading.Thread(target=_do_restart, daemon=True).start()
     return web.json_response({"ok": True})
 
+async def api_ports(request):
+    """List available serial ports."""
+    current = _get_active_port()
+    ports = []
+    if HAS_SERIAL_TOOLS:
+        ports = sorted(p.device for p in _list_ports.comports())
+    if current not in ports:
+        ports.insert(0, current)
+    return web.json_response({"ports": ports, "current": current})
+
+async def api_set_port(request):
+    """Persist a new serial port selection to config and return ok."""
+    try:
+        body = await request.json()
+        new_port = str(body.get("port", "")).strip()
+        if not new_port:
+            return web.json_response({"ok": False, "error": "empty port"}, status=400)
+        cfg = _load_config()
+        cfg["port"] = new_port
+        _save_config(cfg)
+        return web.json_response({"ok": True, "port": new_port})
+    except Exception as e:
+        return web.json_response({"ok": False, "error": str(e)}, status=400)
+
 async def on_startup(app):
     app["hand_task"]    = asyncio.create_task(hand_loop(app))
     app["inspire_task"] = asyncio.create_task(inspire_loop(app))
@@ -426,6 +462,8 @@ def main():
     app.router.add_post("/api/inspire/config", api_inspire_config_post)
     app.router.add_get( "/api/inspire/scan",   api_inspire_scan)
     app.router.add_post("/api/restart",         api_restart)
+    app.router.add_get( "/api/ports",            api_ports)
+    app.router.add_post("/api/port",             api_set_port)
     app.router.add_static("/static", STATIC)
     app.on_startup.append(on_startup)
     app.on_cleanup.append(on_cleanup)

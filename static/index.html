@@ -491,6 +491,32 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
 #onboarding-modal .ob-start:hover{background:#6bbcc8}
 #onboarding-modal .ob-help-link{font-size:12px;color:var(--text3);cursor:pointer;text-decoration:underline;text-underline-offset:3px;background:none;border:none;font-family:inherit;padding:0}
 #onboarding-modal .ob-help-link:hover{color:var(--text2)}
+/* ── Toast notifications ── */
+#toast-container{position:fixed;bottom:20px;right:20px;z-index:99999;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-radius:9px;background:var(--surface);border:1px solid var(--border-hi);box-shadow:0 8px 32px rgba(0,0,0,.5);font-size:13px;color:var(--text);max-width:340px;pointer-events:all;animation:toastIn .22s cubic-bezier(.22,.68,0,1.2);line-height:1.4}
+.toast.out{animation:toastOut .2s ease forwards}
+.toast-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.toast-body{flex:1}
+.toast-close{cursor:pointer;color:var(--text3);font-size:14px;padding:0 2px;background:none;border:none;font-family:inherit;flex-shrink:0;transition:color .12s}
+.toast-close:hover{color:var(--text)}
+.toast.info{border-color:rgba(88,164,176,.4)}
+.toast.warn{border-color:rgba(219,157,71,.4);background:rgba(7,24,32,.98)}
+.toast.err{border-color:rgba(240,62,90,.4)}
+.toast.ok{border-color:rgba(0,201,125,.4)}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px) scale(.95)}to{opacity:1;transform:none}}
+@keyframes toastOut{from{opacity:1;transform:none}to{opacity:0;transform:translateY(8px) scale(.95)}}
+/* ── Keyboard hint badge on pose buttons ── */
+.kbd-hint{display:inline-block;background:var(--surface3);border:1px solid var(--border-hi);border-radius:3px;padding:0 4px;font-family:var(--mono);font-size:10px;color:var(--text3);line-height:15px;margin-left:3px;vertical-align:middle;pointer-events:none}
+/* ── Cheat sheet tip card ── */
+#cheatsheet-wrap{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9998;animation:toastIn .28s cubic-bezier(.22,.68,0,1.2)}
+#cheatsheet{background:var(--surface);border:1px solid var(--border-hi);border-radius:12px;padding:16px 20px;box-shadow:0 12px 40px rgba(0,0,0,.6);min-width:360px;max-width:560px}
+#cheatsheet h3{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.cheat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.cheat-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2)}
+.cheat-key{display:inline-block;background:var(--surface3);border:1px solid var(--border-hi);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:12px;color:var(--text);min-width:22px;text-align:center}
+/* ── Port picker in header ── */
+#port-picker-wrap{display:none;align-items:center;gap:6px;padding:0 10px;border-left:1px solid var(--border-hi)}
+.port-select{height:22px;border-radius:5px;background:var(--surface2);border:1px solid var(--border-hi);color:var(--text);font-family:var(--mono);font-size:11px;padding:0 6px;outline:none;cursor:pointer;max-width:180px}
 </style>
 </head>
 <body>
@@ -519,6 +545,14 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
       <option value="brainco">BrainCo Revo2Touch</option>
       <option value="inspire">Inspire Dex RH56dfq</option>
     </select>
+  </div>
+  <!-- BrainCo serial port picker (hidden when Inspire selected) -->
+  <div id="port-picker-wrap">
+    <span style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);flex-shrink:0">Port</span>
+    <select class="port-select" id="portSelect" onchange="setPort(this.value)">
+      <option id="portCurrent">Loading…</option>
+    </select>
+    <button class="h-btn" onclick="fetchPorts()" title="Refresh port list" style="padding:0 7px;height:22px;font-size:11px">&#x21bb;</button>
   </div>
   <!-- Inspire controls (hidden when BrainCo selected) -->
   <div id="inspire-status" style="display:none;align-items:center;gap:6px;padding:0 12px;border-left:1px solid var(--border-hi)">
@@ -613,17 +647,17 @@ canvas#radarChart{position:absolute;inset:0;width:100%;height:100%}
           <span class="sec-title">Poses</span>
         </div>
         <div class="pose-grid">
-          <button class="pbtn" onclick="sendPose('open')"><span class="em">&#x1f590;&#xfe0f;</span>Open</button>
-          <button class="pbtn" onclick="sendPose('fist')"><span class="em">&#x270a;</span>Fist</button>
-          <button class="pbtn" onclick="sendPose('point')"><span class="em">&#x261d;&#xfe0f;</span>Point</button>
-          <button class="pbtn" onclick="sendPose('peace')"><span class="em">&#x270c;&#xfe0f;</span>Peace</button>
-          <button class="pbtn" onclick="sendPose('pinch')"><span class="em">&#x1f90f;</span>Pinch</button>
-          <button class="pbtn" onclick="sendPose('ok')"><span class="em">&#x1f44c;</span>OK</button>
-          <button class="pbtn" onclick="sendPose('gun')"><span class="em">&#x1f52b;</span>Gun</button>
-          <button class="pbtn" onclick="sendPose('claw')"><span class="em">&#x1f9be;</span>Claw</button>
+          <button class="pbtn" onclick="sendPose('open')"><span class="em">&#x1f590;&#xfe0f;</span>Open<span class="kbd-hint">O</span></button>
+          <button class="pbtn" onclick="sendPose('fist')"><span class="em">&#x270a;</span>Fist<span class="kbd-hint">F</span></button>
+          <button class="pbtn" onclick="sendPose('point')"><span class="em">&#x261d;&#xfe0f;</span>Point<span class="kbd-hint">P</span></button>
+          <button class="pbtn" onclick="sendPose('peace')"><span class="em">&#x270c;&#xfe0f;</span>Peace<span class="kbd-hint">V</span></button>
+          <button class="pbtn" onclick="sendPose('pinch')"><span class="em">&#x1f90f;</span>Pinch<span class="kbd-hint">N</span></button>
+          <button class="pbtn" onclick="sendPose('ok')"><span class="em">&#x1f44c;</span>OK<span class="kbd-hint">K</span></button>
+          <button class="pbtn" onclick="sendPose('gun')"><span class="em">&#x1f52b;</span>Gun<span class="kbd-hint">G</span></button>
+          <button class="pbtn" onclick="sendPose('claw')"><span class="em">&#x1f9be;</span>Claw<span class="kbd-hint">C</span></button>
           <button class="pbtn" onclick="sendPose('relax')"><span class="em">&#x1f4a4;</span>Relax</button>
-          <button class="pbtn" onclick="sendPose('rock')"><span class="em">&#x1f918;</span>Rock</button>
-          <button class="pbtn" onclick="sendPose('three')"><span class="em">3&#xfe0f;&#x20e3;</span>Three</button>
+          <button class="pbtn" onclick="sendPose('rock')"><span class="em">&#x1f918;</span>Rock<span class="kbd-hint">R</span></button>
+          <button class="pbtn" onclick="sendPose('three')"><span class="em">3&#xfe0f;&#x20e3;</span>Three<span class="kbd-hint">T</span></button>
           <button class="pbtn" id="wavebtn" onclick="if(ws&&ws.readyState===1&&currentDevice==='inspire')ws.send(JSON.stringify({type:'inspire_wave'}))" style="display:none"><span class="em">&#x1f44b;</span>Wave</button>
           <button class="pbtn" id="thumbsbtn" onclick="sendPose('thumbs')" style="display:none"><span class="em">&#x1f44d;</span>Thumbs</button>
           <button class="pbtn wide" id="demobtn" onclick="runDemo()"><span class="em">&#x25b6;</span>Run Demo</button>
@@ -713,6 +747,11 @@ run();</textarea>
       </div>
     </div>
     <div class="stream-inspector" id="tab-stream">
+      <div style="position:sticky;top:0;padding:6px 10px;background:rgba(4,15,22,.92);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;z-index:1;flex-shrink:0">
+        <span style="font-size:11px;color:var(--text3);flex:1">Last <b id="streamCountLabel">0</b> frames</span>
+        <button class="btn-sm" onclick="saveStreamJSON()" title="Save captured stream to JSON file">&#x2B07; Save JSON</button>
+        <button class="btn-sm" onclick="clearStream()" title="Clear stream view">&#x2715; Clear</button>
+      </div>
       <div class="stream-empty" id="streamEmpty">Waiting for data&hellip;</div>
     </div>
     <div class="logger-panel" id="tab-logger">
@@ -763,6 +802,8 @@ run();</textarea>
         <div class="cls-controls">
           <button class="btn-sm primary" onclick="clsTrain()">&#x21bb; Train k-NN</button>
           <button class="btn-sm" onclick="clsClear()">Reset Model</button>
+          <button class="btn-sm" onclick="clsExport()" title="Save model + labels to JSON">&#x1F4BE; Export</button>
+          <label class="btn-sm" style="cursor:pointer" title="Load a previously exported model">&#x1F4C2; Import<input type="file" accept=".json" style="display:none" onchange="clsImport(this)"></label>
           <div class="cls-k-row">k = <input type="number" id="clsK" value="3" min="1" max="15"/> neighbors</div>
           <div style="font-size:13px;color:var(--text3);line-height:1.6">Uses labeled snapshots<br>from the Labels tab.</div>
         </div>
@@ -1247,7 +1288,12 @@ const palmLbl=mkEl("text",{x:"100",y:"230","class":"palm-label"});palmLbl.textCo
 const fingerData=[];
 FDEFS.forEach((fd,fi)=>{
   const rad=fd.angle*Math.PI/180;
-  const g=mkEl("g",{id:"fg"+fi,"class":"finger-group"});handSvg.appendChild(g);
+  const g=mkEl("g",{id:"fg"+fi,"class":"finger-group"});
+  // Tooltip: show interaction hints
+  const title=document.createElementNS(SVG_NS,'title');
+  title.textContent=fd.name+' — scroll to adjust · click to toggle · drag up/down';
+  g.appendChild(title);
+  handSvg.appendChild(g);
   const bones=[],knuckles=[];
   let cx=fd.bx,cy=fd.by;
   fd.segs.forEach((len,si)=>{
@@ -1413,8 +1459,12 @@ const streamContainer=document.getElementById("tab-stream");
 const streamEmpty=document.getElementById("streamEmpty");
 function addStreamRow(data){
   streamCount++;
+  streamData.push({ts:Date.now(),...data});
+  if(streamData.length>MAX_STREAM)streamData.shift();
   streamEmpty.style.display="none";
   document.getElementById("streamBadge").textContent=streamCount>999?"999+":streamCount;
+  const lbl=document.getElementById("streamCountLabel");
+  if(lbl)lbl.textContent=Math.min(streamCount,MAX_STREAM);
   const rows=streamContainer.querySelectorAll(".stream-row");
   if(rows.length>=MAX_STREAM)rows[rows.length-1].remove();
   const ts=new Date().toLocaleTimeString("en",{hour12:false,hour:"2-digit",minute:"2-digit",second:"2-digit"});
@@ -1599,6 +1649,9 @@ function switchDevice(id){
   // Show Inspire status panel only when Inspire is selected
   const inspStatus=document.getElementById('inspire-status');
   if(inspStatus)inspStatus.style.display=id==='inspire'?'flex':'none';
+  // Show BrainCo port picker only for BrainCo
+  const portWrap=document.getElementById('port-picker-wrap');
+  if(portWrap){portWrap.style.display=id==='brainco'?'flex':'none';if(id==='brainco')fetchPorts();}
   // Show Inspire-only pose buttons
   ['wavebtn','thumbsbtn'].forEach(bid=>{
     const b=document.getElementById(bid);
@@ -1611,10 +1664,18 @@ function switchDevice(id){
 const hbdot=document.getElementById("hbdot"),hbtext=document.getElementById("hbtext");
 const hzlbl=document.getElementById("hzlbl");
 const devinfo=document.getElementById("devinfo");
+let _disconnectCount=0;
 function setBadge(state,text){
   hbdot.className="h-status-dot"+(state==="ok"?" ok":state==="err"?" err":"");
   hbtext.className="h-status-label"+(state==="ok"?" ok":state==="err"?" err":"");
   hbtext.textContent=text;
+  if(state==="ok"){_disconnectCount=0;}
+  if(state==="err"){
+    _disconnectCount++;
+    if(_disconnectCount===3){
+      showToast('Hardware not connected — check USB cable and port. <a href="#" onclick="switchMode(\'help\');return false;" style="color:var(--accent)">Open Help ↗</a>','warn',8000);
+    }
+  }
 }
 // ── Onboarding flow ───────────────────────────────────────────────────────
 async function restartServer(){
@@ -1650,6 +1711,93 @@ function showOnboardingModal(){
 function closeOnboardingModal(openHelp){
   document.getElementById('onboarding-backdrop').style.display='none';
   if(openHelp) switchMode('help');
+  else showCheatSheet();
+}
+
+// ── Toast notifications ───────────────────────────────────────────────────────
+function showToast(msg, type='info', ms=4000){
+  const c=document.getElementById('toast-container');
+  const icons={info:'ℹ️',warn:'⚠️',err:'❌',ok:'✅'};
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=`<span class="toast-icon">${icons[type]||'ℹ️'}</span><span class="toast-body">${msg}</span><button class="toast-close" onclick="this.closest('.toast').remove()">✕</button>`;
+  c.appendChild(t);
+  setTimeout(()=>{t.classList.add('out');setTimeout(()=>t.remove(),220);},ms);
+}
+
+// ── Cheat sheet ───────────────────────────────────────────────────────────────
+function showCheatSheet(){
+  const w=document.getElementById('cheatsheet-wrap');
+  w.style.display='flex';
+  setTimeout(()=>{w.style.display='none';},8000);
+}
+
+// ── Serial port picker ────────────────────────────────────────────────────────
+async function fetchPorts(){
+  try{
+    const data=await fetch('/api/ports').then(r=>r.json());
+    const sel=document.getElementById('portSelect');
+    if(!sel)return;
+    const cur=data.current||'';
+    sel.innerHTML='';
+    (data.ports||[cur]).forEach(p=>{
+      const o=document.createElement('option');
+      o.value=p;o.textContent=p;
+      if(p===cur)o.selected=true;
+      sel.appendChild(o);
+    });
+    if(!sel.options.length){const o=document.createElement('option');o.value=cur;o.textContent=cur||'No ports found';sel.appendChild(o);}
+  }catch(_){}
+}
+async function setPort(portName){
+  if(!portName)return;
+  try{
+    const r=await fetch('/api/port',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({port:portName})});
+    if(r.ok){showToast(`Port set to <b>${portName}</b> — restarting…`,'ok',3000);setTimeout(()=>restartServer(),500);}
+    else showToast('Failed to set port','err');
+  }catch(e){showToast('Failed to set port: '+e,'err');}
+}
+
+// ── Stream inspector save ─────────────────────────────────────────────────────
+const streamData=[];
+function saveStreamJSON(){
+  if(!streamData.length){showToast('No stream data captured yet','warn');return;}
+  dlFile('stream_'+Date.now()+'.json',JSON.stringify(streamData,null,2),'application/json');
+  showToast(`Saved ${streamData.length} frames`,'ok');
+}
+function clearStream(){
+  document.getElementById('tab-stream').querySelectorAll('.stream-row').forEach(r=>r.remove());
+  streamData.length=0;
+  streamCount=0;
+  document.getElementById('streamBadge').textContent='0';
+  document.getElementById('streamCountLabel').textContent='0';
+  document.getElementById('streamEmpty').style.display='';
+  showToast('Stream cleared','info',2000);
+}
+
+// ── Classifier export / import ────────────────────────────────────────────────
+function clsExport(){
+  if(!knnModel&&!labelsList.length){showToast('Nothing to export — train a model first','warn');return;}
+  const payload={version:1,model:knnModel,labels:labelsList};
+  dlFile('cls_model_'+Date.now()+'.json',JSON.stringify(payload,null,2),'application/json');
+  showToast('Model exported','ok');
+}
+function clsImport(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.model){knnModel=data.model;document.getElementById('clsInfo').textContent='Model loaded ('+knnModel.samples.length+' samples, '+knnModel.classes.length+' classes)';}
+      if(data.labels&&Array.isArray(data.labels)){
+        data.labels.forEach(l=>labelsList.push(l));
+        renderLabels();updateExportStats();
+      }
+      showToast('Model imported ✔','ok');
+    }catch(err){showToast('Import failed: '+err.message,'err');}
+  };
+  reader.readAsText(file);
+  input.value='';
 }
 
 // ── Inspire IP configuration helpers ─────────────────────────────────────────
@@ -1944,7 +2092,7 @@ document.getElementById("hand-svg").addEventListener("mousedown",e=>{if(mirrorAc
 function toggleRecording(){
   const btn=document.getElementById("recBtn");
   if(!activeRecording){
-    startSessionRec();btn.classList.add("recording");btn.innerHTML='<span class="dot"></span>Stop Rec';
+    startSessionRec();btn.classList.add("recording");btn.innerHTML='<span class="dot"></span>&#9632; Stop';
     switchTab("recorder");if(drawerCollapsed)toggleDrawer();
   } else {
     stopSessionRec();btn.classList.remove("recording");btn.innerHTML='<span class="dot"></span>Record';
@@ -1954,6 +2102,7 @@ function toggleRecording(){
 connect();updateHandViz(sliderVals);
 setInterval(updateHeaderMetrics,1000);
 window.addEventListener("resize",drawChart);
+fetchPorts(); // populate port picker on load
 
 // ── Row resize ─────────────────────────────────────────
 (function(){
@@ -2315,6 +2464,7 @@ const DEFAULT_MAPPINGS=[
   {key:'v',action:'pose:peace'},{key:'n',action:'pose:pinch'},{key:'k',action:'pose:ok'},
   {key:'g',action:'pose:gun'},{key:'c',action:'pose:claw'},{key:'r',action:'pose:rock'},
   {key:'t',action:'pose:three'},{key:'d',action:'demo'},{key:' ',action:'pose:open'},
+  {key:'?',action:'help'},
 ];
 let keyMappings=[...DEFAULT_MAPPINGS.map(m=>({...m}))];
 let mapListening=-1;
@@ -2323,6 +2473,7 @@ let midiAccess=null;
 function applyMapping(action){
   if(action.startsWith('pose:')){sendPose(action.slice(5));}
   else if(action==='demo'){runDemo();}
+  else if(action==='help'){switchMode('help');}
 }
 function mapReset(){keyMappings=DEFAULT_MAPPINGS.map(m=>({...m}));renderMapRows();}
 function mapAddRow(){keyMappings.push({key:'?',action:'pose:open'});renderMapRows();}
@@ -2428,14 +2579,41 @@ async function seqPlay(){
       _seqRender(step.id);
       const el=document.getElementById('seqstep'+step.id);
       if(el)el.scrollIntoView({block:'nearest'});
-      sendPose(step.pose);
+      // ── Tween transition ──────────────────────────────────────────────────
+      const tweenSpeed=parseInt(document.getElementById('seqTweenSpeed')?.value||5);
+      const tweenMs=tweenSpeed>1?(tweenSpeed-1)*120:0; // 0–960 ms
+      const targetPose=currentDevice==='inspire'?INSPIRE_POSES[step.pose]:POSES[step.pose];
+      if(tweenMs>0&&targetPose){
+        const startVals=[...sliderVals];
+        const tweenStart=Date.now();
+        while(Date.now()-tweenStart<tweenMs){
+          if(seqAbort)break;
+          const t=Math.min((Date.now()-tweenStart)/tweenMs,1);
+          const ease=t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2; // ease-in-out
+          for(let i=0;i<6;i++){
+            const v=Math.round(startVals[i]+(targetPose[i]-startVals[i])*ease);
+            sliderVals[i]=v;
+            const sl=document.getElementById('sl'+i);if(sl)sl.value=v;
+            setTileVal(i,v);
+          }
+          sendPositions();updateHandViz(sliderVals);
+          await new Promise(r=>setTimeout(r,32));
+        }
+        // ensure we land exactly on the target
+        targetPose.forEach((v,i)=>{sliderVals[i]=v;const sl=document.getElementById('sl'+i);if(sl)sl.value=v;setTileVal(i,v);});
+        sendPositions();updateHandViz(sliderVals);
+      } else {
+        sendPose(step.pose);
+      }
+      // ── Hold ─────────────────────────────────────────────────────────────
+      const holdMs=Math.max(step.dur-tweenMs,50);
       const start=Date.now();
-      while(Date.now()-start<step.dur){
+      while(Date.now()-start<holdMs){
         if(seqAbort)break;
-        const frac=(Date.now()-start)/step.dur;
+        const frac=(Date.now()-start)/holdMs;
         const pg=document.getElementById('seqsprog'+step.id);
         if(pg)pg.style.width=(frac*100)+'%';
-        document.getElementById('seqPlaybarFill').style.width=(((elapsed+(Date.now()-start))/totalDur)*100)+'%';
+        document.getElementById('seqPlaybarFill').style.width=(((elapsed+(tweenMs+Date.now()-start))/totalDur)*100)+'%';
         await new Promise(r=>setTimeout(r,32));
       }
       elapsed=(elapsed+step.dur)%totalDur;
@@ -2524,5 +2702,27 @@ function seqStop(internal){
   </div>
 </div>
 <script>showDeviceSelectModal();</script>
+<!-- ── Toast container ─────────────────────────────────────────────────── -->
+<div id="toast-container"></div>
+<!-- ── First-run cheat sheet ──────────────────────────────────────────── -->
+<div id="cheatsheet-wrap" style="display:none">
+  <div id="cheatsheet">
+    <h3>⌨️ Quick shortcuts <button onclick="document.getElementById('cheatsheet-wrap').style.display='none'" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0">✕</button></h3>
+    <div class="cheat-grid">
+      <div class="cheat-item"><span class="cheat-key">O</span> Open hand</div>
+      <div class="cheat-item"><span class="cheat-key">F</span> Fist</div>
+      <div class="cheat-item"><span class="cheat-key">P</span> Point</div>
+      <div class="cheat-item"><span class="cheat-key">V</span> Peace ✌️</div>
+      <div class="cheat-item"><span class="cheat-key">G</span> Gun 🔫</div>
+      <div class="cheat-item"><span class="cheat-key">C</span> Claw</div>
+      <div class="cheat-item"><span class="cheat-key">R</span> Rock 🤘</div>
+      <div class="cheat-item"><span class="cheat-key">T</span> Three 3️⃣</div>
+      <div class="cheat-item"><span class="cheat-key">D</span> Demo</div>
+      <div class="cheat-item"><span class="cheat-key">Space</span> Open hand</div>
+      <div class="cheat-item"><span class="cheat-key">?</span> Help tab</div>
+      <div class="cheat-item" style="color:var(--text3);font-size:11px">Scroll fingers on SVG hand</div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
