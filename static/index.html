@@ -56,6 +56,8 @@ header{
 .h-status-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);transition:all .4s;flex-shrink:0}
 .h-status-dot.ok{background:var(--green);box-shadow:0 0 7px var(--green)}
 .h-status-dot.err{background:var(--red);box-shadow:0 0 6px var(--red)}
+.h-status-dot.connecting{background:var(--yellow);animation:pulseDot 1s ease-in-out infinite}
+@keyframes pulseDot{0%,100%{opacity:1;box-shadow:0 0 5px var(--yellow)}50%{opacity:.35;box-shadow:none}}
 .h-status-label{font-size:13px;font-weight:500;color:var(--text2);transition:color .4s;white-space:nowrap}
 .h-status-label.ok{color:var(--green)}
 .h-status-label.err{color:var(--red)}
@@ -1344,7 +1346,7 @@ const tooltip=document.getElementById("hand-tooltip");
 FDEFS.forEach((fd,fi)=>{
   const g=document.getElementById("fg"+fi);
   g.addEventListener("mouseenter",()=>{tooltip.style.display="block";});
-  g.addEventListener("mousemove",e=>{tooltip.textContent=fd.name+" · "+sliderVals[fd.si];tooltip.style.left=(e.clientX+14)+"px";tooltip.style.top=(e.clientY-8)+"px";});
+  g.addEventListener("mousemove",e=>{tooltip.textContent=fd.name+" · "+sliderVals[fd.si];const tx=Math.min(e.clientX+14,window.innerWidth-150);const ty=Math.max(e.clientY-8,8);tooltip.style.left=tx+"px";tooltip.style.top=ty+"px";});
   g.addEventListener("mouseleave",()=>{tooltip.style.display="none";});
   g.addEventListener("click",e=>{
     if(dragMoved){dragMoved=false;return;}
@@ -1523,8 +1525,9 @@ function captureLabel(){
   const name=inp.value.trim();if(!name)return;
   labelsList.push({ts:Date.now(),label:name,positions:[...sliderVals],force:[...forceLevel]});
   renderLabels();updateExportStats();inp.value="";inp.focus();
+  showToast('Captured “'+name+'”','ok',1500);
 }
-function clearLabels(){labelsList.length=0;renderLabels();updateExportStats();}
+function clearLabels(){if(!labelsList.length||!confirm('Delete all '+labelsList.length+' label'+(labelsList.length!==1?'s':'')+"? This can't be undone."))return;labelsList.length=0;renderLabels();updateExportStats();showToast('Labels cleared','info');}
 function renderLabels(){
   const list=document.getElementById("labelsList");
   document.getElementById("labelsBadge").textContent=labelsList.length;
@@ -1546,7 +1549,12 @@ function dlFile(name,content,mime){
   a.href=URL.createObjectURL(new Blob([content],{type:mime}));
   a.download=name;a.click();URL.revokeObjectURL(a.href);
 }
-function exportJSON(){dlFile("revo2_buffer_"+Date.now()+".json",JSON.stringify(frameBuffer,null,2),"application/json");}
+function exportJSON(){
+  try{
+    dlFile("revo2_buffer_"+Date.now()+".json",JSON.stringify(frameBuffer,null,2),"application/json");
+    showToast(frameBuffer.length+' frames exported','ok',2000);
+  }catch(e){showToast('Export failed: '+e.message,'err');}
+}
 function exportCSV(){
   const rows=["ts,thumb,thaux,index,middle,ring,pinky,f0,f1,f2,f3,f4"];
   frameBuffer.forEach(f=>{
@@ -1556,22 +1564,22 @@ function exportCSV(){
   dlFile("revo2_buffer_"+Date.now()+".csv",rows.join("\n"),"text/csv");
 }
 function exportLabels(){
-  if(!labelsList.length){alert("No labels captured yet.");return;}
+  if(!labelsList.length){showToast('No labels captured yet','warn');return;}
   const rows=["ts,label,thumb,thaux,index,middle,ring,pinky,f0,f1,f2,f3,f4"];
   labelsList.forEach(e=>rows.push([e.ts,'"'+e.label+'"',...e.positions,...e.force.map(v=>v.toFixed(4))].join(",")));
   dlFile("revo2_labels_"+Date.now()+".csv",rows.join("\n"),"text/csv");
 }
 function exportSessions(){
-  if(!sessions.length){alert("No sessions recorded yet.");return;}
+  if(!sessions.length){showToast('No sessions recorded yet','warn');return;}
   dlFile("revo2_sessions_"+Date.now()+".json",JSON.stringify(sessions,null,2),"application/json");
 }
 function copyWsUrl(){
   const url=(location.protocol==="https:"?"wss":"ws")+"://"+location.host+"/ws";
-  navigator.clipboard.writeText(url).then(()=>alert("Copied: "+url));
+  navigator.clipboard.writeText(url).then(()=>showToast('WebSocket URL copied!','ok',2000));
 }
 function copyPySnippet(){
   const s=`import asyncio, json, websockets\n\nasync def stream():\n    uri = "ws://localhost:8765/ws"\n    async with websockets.connect(uri) as ws:\n        async for msg in ws:\n            data = json.loads(msg)\n            print(data["positions"], data.get("touch"))\n\nasyncio.run(stream())`;
-  navigator.clipboard.writeText(s).then(()=>alert("Python snippet copied!"));
+  navigator.clipboard.writeText(s).then(()=>showToast('Python snippet copied!','ok',2000));
 }
 function updateExportStats(){
   document.getElementById("expFrames").textContent=frameBuffer.length.toLocaleString();
@@ -1666,7 +1674,7 @@ const hzlbl=document.getElementById("hzlbl");
 const devinfo=document.getElementById("devinfo");
 let _disconnectCount=0;
 function setBadge(state,text){
-  hbdot.className="h-status-dot"+(state==="ok"?" ok":state==="err"?" err":"");
+  hbdot.className="h-status-dot"+(state==="ok"?" ok":state==="err"?" err":state==="connecting"?" connecting":"");
   hbtext.className="h-status-label"+(state==="ok"?" ok":state==="err"?" err":"");
   hbtext.textContent=text;
   if(state==="ok"){_disconnectCount=0;}
@@ -1840,7 +1848,7 @@ async function scanFromModal(){
   try{
     const found=await fetch('/api/inspire/scan').then(r=>r.json());
     const ips=Object.keys(found);
-    if(ips.length===0){alert('No Inspire hands found on 192.168.124.200-215');}
+    if(ips.length===0){showToast('No Inspire hands found on 192.168.124.200–215','warn');}
     else{
       const ml=document.getElementById('modal-l-ip');
       const mr=document.getElementById('modal-r-ip');
@@ -1851,18 +1859,19 @@ async function scanFromModal(){
       if(ips[0]&&hl)hl.value=ips[0];
       if(ips[1]&&hr)hr.value=ips[1];
     }
-  }catch(e){alert('Scan failed: '+e);}
+  }catch(e){showToast('Scan failed: '+e,'err');}
   finally{if(btn){btn.textContent='🔍 Scan';btn.disabled=false;}}
 }
 async function applyInspireIPs(){
   const l=document.getElementById('inspire-l-ip').value.trim();
   const r=document.getElementById('inspire-r-ip').value.trim();
-  if(!l&&!r){alert('Enter at least one IP address.');return;}
+  if(!l&&!r){showToast('Enter at least one IP address','warn');return;}
   try{
     const res=await fetch('/api/inspire/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({left:l,right:r})});
     const j=await res.json();
-    if(!j.ok){alert('Error: '+j.error);}
-  }catch(e){alert('Could not reach server: '+e);}
+    if(!j.ok){showToast('Error: '+j.error,'err');}
+    else{showToast('IP config saved','ok',2000);}
+  }catch(e){showToast('Could not reach server: '+e,'err');}
 }
 async function scanInspireHands(){
   const btn=document.getElementById('scanBtn');
@@ -1871,7 +1880,7 @@ async function scanInspireHands(){
     const res=await fetch('/api/inspire/scan');
     const found=await res.json();
     const ips=Object.keys(found);
-    if(ips.length===0){alert('No Inspire hands found on 192.168.124.200-215');}
+    if(ips.length===0){showToast('No Inspire hands found on 192.168.124.200–215','warn');}
     else{
       const msg='Found:\n'+ips.map(ip=>'  '+ip).join('\n')+'\n\nAssign left/right IPs?';
       if(confirm(msg)){
@@ -1882,14 +1891,15 @@ async function scanInspireHands(){
         await applyInspireIPs();
       }
     }
-  }catch(e){alert('Scan failed: '+e);}
+  }catch(e){showToast('Scan failed: '+e,'err');}
   finally{if(btn){btn.textContent='🔍 Scan';btn.disabled=false;}}
 }
 function connect(){
   const proto=location.protocol==="https:"?"wss":"ws";
+  setBadge("connecting","Connecting…");
   ws=new WebSocket(proto+"://"+location.host+"/ws");
   ws.onopen=()=>{setBadge("ok","Connected");};
-  ws.onclose=()=>{if(!activeRecording)setBadge("err","Disconnected");setTimeout(connect,2000);};
+  ws.onclose=()=>{if(!activeRecording)setBadge("connecting","Reconnecting…");setTimeout(connect,2000);};
   ws.onerror=()=>ws.close();
   ws.onmessage=e=>{
     const d=JSON.parse(e.data);
@@ -2364,7 +2374,7 @@ function renderMotionList(){
     list.appendChild(el);
   });
 }
-function motDelete(idx){motions.splice(idx,1);document.getElementById('motionBadge').textContent=motions.length;renderMotionList();}
+function motDelete(idx){motions.splice(idx,1);document.getElementById('motionBadge').textContent=motions.length;renderMotionList();showToast('Motion deleted','info',1500);}
 function motRename(idx){
   const n=prompt('New name:',motions[idx].name);
   if(n&&n.trim()){motions[idx].name=n.trim();renderMotionList();}
@@ -2440,6 +2450,12 @@ function pcaRender(){
   ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(W/2,pad);ctx.lineTo(W/2,H-pad);ctx.stroke();
   ctx.beginPath();ctx.moveTo(pad,H/2);ctx.lineTo(W-pad,H/2);ctx.stroke();
+  // axis labels
+  ctx.fillStyle='rgba(255,255,255,.22)';ctx.font='10px Inter,sans-serif';
+  ctx.textAlign='right';ctx.fillText('PC1 →',W-pad+2,H/2-5);
+  ctx.textAlign='center';
+  ctx.save();ctx.translate(pad-2,pad+20);ctx.rotate(-Math.PI/2);ctx.fillText('PC2 ↑',0,0);ctx.restore();
+  ctx.textAlign='left';
   // points
   const classes=[...new Set(labelsList.map(l=>l.label))];
   classes.forEach((c,ci)=>{if(!pcaClassColors[c])pcaClassColors[c]=PCA_COLORS[ci%PCA_COLORS.length];});
@@ -2548,7 +2564,7 @@ function seqAddAll(){
 }
 
 function seqDeleteStep(id){seqSteps=seqSteps.filter(s=>s.id!==id);_seqRender();}
-function seqClear(){if(seqRunning)seqStop();seqSteps=[];_seqRender();}
+function seqClear(){if(!seqSteps.length||!confirm('Clear all '+seqSteps.length+' step'+(seqSteps.length!==1?'s':'')+' from sequencer?'))return;if(seqRunning)seqStop();seqSteps=[];_seqRender();}
 
 function _seqRender(activeId){
   document.getElementById('seqCount').textContent=seqSteps.length;
