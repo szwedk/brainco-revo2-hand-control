@@ -75,6 +75,7 @@ INSPIRE_HANDS: dict = _load_config()
 
 INSPIRE_RETRY_INTERVAL = 10.0   # seconds between reconnect attempts when offline
 inspire_retry_after: dict = {"left": 0.0, "right": 0.0}
+inspire_logged_offline: dict = {"left": False, "right": False}  # suppress repeat log spam
 
 # Pose library — finger order: [Little, Ring, Middle, Index, Thumb-bend, Thumb-rotate]
 INSPIRE_POSES = {
@@ -118,12 +119,18 @@ state = {
 }
 clients: set = set()
 hand_ctx = None
+hand_retry_after = 0.0
+hand_logged_offline = False
 
 
 # ── hand loop ─────────────────────────────────────────────────────────────────
 async def hand_loop(app):
-    global hand_ctx
+    global hand_ctx, hand_retry_after, hand_logged_offline
     while True:
+        now = time.monotonic()
+        if now < hand_retry_after:
+            await asyncio.sleep(0.5)
+            continue
         active_port = _get_active_port()
         try:
             print(f"[hand] Connecting to {active_port}…")
@@ -146,6 +153,7 @@ async def hand_loop(app):
                     print(f"[hand] touch_sensor_setup skipped: {e}")
 
             state["connected"] = True
+            hand_logged_offline = False
             print("[hand] Streaming…")
 
             while True:
@@ -188,8 +196,11 @@ async def hand_loop(app):
         except Exception:
             state["connected"] = False
             hand_ctx = None
-            print("[hand] Not connected — retrying in 3s…")
-            await asyncio.sleep(3)
+            hand_retry_after = time.monotonic() + 3.0
+            if not hand_logged_offline:
+                print("[hand] Not connected — retrying silently every 3s…")
+                hand_logged_offline = True
+            await asyncio.sleep(0.5)
 
 
 # ── Inspire Hand helpers ───────────────────────────────────────────────────────
@@ -234,7 +245,6 @@ async def inspire_loop(app):
                 continue
             if now < inspire_retry_after.get(side, 0.0):
                 continue   # still in backoff window
-            print(f"[inspire] Trying {side} hand @ {ip}:{INSPIRE_PORT}…")
             client = AsyncModbusTcpClient(ip, port=INSPIRE_PORT, timeout=2)
             try:
                 await client.connect()
@@ -242,20 +252,26 @@ async def inspire_loop(app):
                     inspire_conns[side] = client
                     inspire_state[f"{side}_connected"] = True
                     inspire_retry_after[side] = 0.0
+                    inspire_logged_offline[side] = False
                     print(f"[inspire] {side} hand connected ✓  ({ip})")
                 else:
                     inspire_state[f"{side}_connected"] = False
                     inspire_retry_after[side] = now + INSPIRE_RETRY_INTERVAL
-                    print(f"[inspire] {side} unreachable — retry in {int(INSPIRE_RETRY_INTERVAL)}s")
+                    if not inspire_logged_offline[side]:
+                        print(f"[inspire] {side} unreachable ({ip}) — retrying silently every {int(INSPIRE_RETRY_INTERVAL)}s")
+                        inspire_logged_offline[side] = True
             except Exception:
                 inspire_state[f"{side}_connected"] = False
                 inspire_retry_after[side] = now + INSPIRE_RETRY_INTERVAL
-                print(f"[inspire] {side} unreachable — retry in {int(INSPIRE_RETRY_INTERVAL)}s")
+                if not inspire_logged_offline[side]:
+                    print(f"[inspire] {side} unreachable ({ip}) — retrying silently every {int(INSPIRE_RETRY_INTERVAL)}s")
+                    inspire_logged_offline[side] = True
 
         # Poll angles on connected hands
         for side, client in list(inspire_conns.items()):
             if not client.connected:
                 inspire_state[f"{side}_connected"] = False
+                inspire_logged_offline[side] = False   # allow one log on next failure
                 inspire_conns.pop(side, None)
                 inspire_retry_after[side] = time.monotonic() + INSPIRE_RETRY_INTERVAL
                 continue
@@ -266,6 +282,7 @@ async def inspire_loop(app):
                 inspire_state[f"{side}_connected"] = True
             except Exception:
                 inspire_state[f"{side}_connected"] = False
+                inspire_logged_offline[side] = False   # allow one log on next failure
                 inspire_conns.pop(side, None)
                 inspire_retry_after[side] = time.monotonic() + INSPIRE_RETRY_INTERVAL
 
@@ -294,6 +311,8 @@ async def ws_handler(request):
         async for msg in ws:
             if msg.type == web.WSMsgType.TEXT:
                 await handle_command(msg.data)
+    except asyncio.CancelledError:
+        pass
     finally:
         clients.discard(ws)
     return ws
@@ -341,6 +360,8 @@ async def handle_command(data: str):
             asyncio.create_task(_inspire_wave())
 
     except Exception as e:
+        if isinstance(e, asyncio.CancelledError):
+            return
         print(f"[cmd] {e}")
 
 
@@ -470,7 +491,7 @@ def main():
     cfg = _load_config()
     print(f"Open http://localhost:{HTTP_PORT}  (Ctrl+C to stop)")
     print(f"[inspire] Left={cfg['left']}  Right={cfg['right']}  Port={INSPIRE_PORT}")
-    web.run_app(app, host="127.0.0.1", port=HTTP_PORT, access_log=None)
+    web.run_app(app, host="0.0.0.0", port=HTTP_PORT, access_log=None)
 
 
 if __name__ == "__main__":
