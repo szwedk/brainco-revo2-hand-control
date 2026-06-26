@@ -21,7 +21,7 @@ import os
 import asyncio
 
 # Add SDK python dir to path
-SDK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "brainco-hand-sdk", "python")
+SDK_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "brainco-hand-sdk", "python")
 sys.path.insert(0, SDK_DIR)
 
 from bc_stark_sdk import main_mod as sdk

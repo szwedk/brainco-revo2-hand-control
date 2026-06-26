@@ -9,7 +9,7 @@ Then open: http://localhost:8765
 """
 
 import sys, os, asyncio, json, time, pathlib, logging
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "brainco-hand-sdk", "python"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "brainco-hand-sdk", "python"))
 
 try:
     from serial.tools import list_ports as _list_ports

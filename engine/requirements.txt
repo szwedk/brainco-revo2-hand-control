@@ -1,0 +1,13 @@
+# RoboStore Studio engine
+aiohttp>=3.9
+pyserial>=3.5
+# bc-stark-sdk is vendored under ../brainco-hand-sdk/python (Python 3.8–3.12).
+#
+# NATIVE PREREQUISITE: bc_stark_sdk's native lib needs libusb at runtime.
+#   macOS:  brew install libusb
+#   Linux:  sudo apt install libusb-1.0-0
+# Without it, the SDK import fails and only the Simulator works.
+# Camera mirror (optional, P1):
+#   mediapipe>=0.10
+#   opencv-python>=4.9
+#   numpy>=1.26

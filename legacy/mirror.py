@@ -40,13 +40,19 @@ def _angle(v1, v2):
     return float(np.degrees(np.arccos(np.clip(np.dot(v1, v2) / (n1 * n2), -1, 1))))
 
 
-def _curl(lm, joints):
-    """Sum of PIP + DIP bend angles → 0-1 curl value."""
+def _curl(lm, joints, dead=22.0, span=150.0):
+    """PIP + DIP bend angles → 0 (straight) … 1 (curled).
+
+    Bend angle is angle(v0, v1): 0° when phalanges are collinear, growing as the
+    joint folds. (The previous -v0/-v1 form measured the interior angle, which is
+    inverted — a straight finger read as fully closed, so everything looked like a
+    fist.)"""
     p = [np.array([lm[j].x, lm[j].y, lm[j].z]) for j in joints]
     v0 = p[1] - p[0]
     v1 = p[2] - p[1]
     v2 = p[3] - p[2]
-    return min((_angle(-v0, v1) + _angle(-v1, v2)) / 160.0, 1.0)
+    bend = _angle(v0, v1) + _angle(v1, v2)
+    return max(0.0, min(1.0, (bend - dead) / span))
 
 
 def _thumb_curl(lm):
@@ -55,7 +61,8 @@ def _thumb_curl(lm):
     v0 = p[1] - p[0]
     v1 = p[2] - p[1]
     v2 = p[3] - p[2]
-    return min((_angle(-v0, v1) + _angle(-v1, v2)) / 140.0, 1.0)
+    bend = _angle(v0, v1) + _angle(v1, v2)
+    return max(0.0, min(1.0, (bend - 12.0) / 78.0))
 
 
 def _thumb_aux(lm):

@@ -4,3 +4,14 @@ __pycache__/
 .DS_Store
 *.egg-info/
 .env
+
+# RoboStore Studio
+studio_config.json
+app/node_modules
+app/dist
+app/src-tauri/target
+app/src-tauri/binaries/
+build/
+# downloaded MediaPipe assets (fetched by scripts/fetch-camera-assets.sh)
+app/public/mediapipe/
+app/public/models/
